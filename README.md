@@ -1,2 +1,4 @@
-# first-opengl-project
+
+# OpenGL Project
+
 First OpenGL project in order to acquire new skills.
