@@ -6,6 +6,8 @@
 - <https://learnopengl.com/Introduction>
 - <https://learnopengl.com/book/book_pdf.pdf>
 - <https://github.com/JoeyDeVries/LearnOpenGL>
+- <https://antongerdelan.net/opengl/index.html>
+- <https://www.opengl-tutorial.org/>
 - <https://open.gl/>
 
 ## Glitter
