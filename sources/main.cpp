@@ -4,6 +4,11 @@
 #include <iostream>
 #include <cstdlib> // EXIT_
 #include <cmath> // sin()
+#include <memory>
+
+#include "Cube.hpp"
+
+#define TR_DADA 0
 
 // settings
 static unsigned int const SCR_WIDTH = 800;
@@ -15,20 +20,34 @@ static unsigned int const SCR_HEIGHT = 600;
 static char const* vertexShaderSource = R"(
   #version 330 core
   layout (location = 0) in vec3 aPos;
+  layout (location = 1) in vec3 aColor;
+  out vec3 ourColor;
   void main() {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = vec4(aPos, 1.0f);
+    ourColor = aColor;
+    // ourColor = aPos;
   }
 )";
 
 static char const* fragmentShaderSource = R"(
   #version 330 core
-  out vec4 FragColor;
-  uniform vec4 ourColor;
+  in vec3 ourColor;
+  out vec4 tr_FragColor;
+  // uniform vec4 ourColor;
   void main() {
-    FragColor = ourColor + vec4(1.0f, 0.0f, 0.0f, 0.0f);
+    tr_FragColor = vec4(ourColor, 1.0);
+    // FragColor = ourColor + vec4(1.0f, 0.0f, 0.0f, 0.0f);
     // FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
   }
 )";
+
+class Program {
+public:
+  virtual void Setup(void) {}
+  virtual void Render(void) {}
+  virtual void TearDown(void) {}
+  virtual ~Program(void) {}
+};
 
 // GLFW: whenever the window size changed (by OS or user resize) this callback function executes
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -91,6 +110,8 @@ int main(void) {
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetKeyCallback(window, keyCallback);
+  // glfwSetWindowUserPointer()
+  // glfwGetWindowUserPointer()
 
   // GLAD: load all OpenGL function pointers
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -99,6 +120,9 @@ int main(void) {
     return EXIT_FAILURE;
   }
 
+  glEnable(GL_DEPTH_TEST);
+
+#if TR_DADA
   int success;
   char infoLog[512];
 
@@ -139,10 +163,10 @@ int main(void) {
   // Normalized Device Coordinates (NDC)
   // Tightly packed
   float vertices[] = {
-     0.5f,  0.5f, 0.0f, // Top right
-     0.5f, -0.5f, 0.0f, // Bottom right
-    -0.5f, -0.5f, 0.0f, // Bottom left
-    -0.5f,  0.5f, 0.0f, // Top left
+     0.5f,  0.5f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, // Top right
+     0.5f, -0.5f, 0.0f, /**/ 0.0f, 1.0f, 0.0f, // Bottom right
+    -0.5f, -0.5f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, // Bottom left
+    -0.5f,  0.5f, 0.0f, /**/ 1.0f, 1.0f, 0.0f, // Top left
   };
 
   unsigned int indices[] = {
@@ -170,18 +194,21 @@ int main(void) {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-
   // The last element buffer object that gets bound while a VAO is bound, is
   // stored as the VAO’s element buffer object. Binding to a VAO then also
   // automatically binds that EBO.
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+  #define LOCATION0 0 // GLSL: layout (location = 0)
+  #define LOCATION1 1 // GLSL: layout (location = 1)
+
   // [...] which VBO it takes its data from is determined by the VBO currently
   // bound to GL_ARRAY_BUFFER when calling glVertexAttribPointer().
-  #define VERTEX_ATTRIBUTE_LOCATION 0 // GLSL: layout (location = 0)
-  glVertexAttribPointer(VERTEX_ATTRIBUTE_LOCATION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
-  glEnableVertexAttribArray(VERTEX_ATTRIBUTE_LOCATION);
+  glVertexAttribPointer(LOCATION0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0);
+  glVertexAttribPointer(LOCATION1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+  glEnableVertexAttribArray(LOCATION0);
+  glEnableVertexAttribArray(LOCATION1);
 
   // Note that this is allowed, the call to glVertexAttribPointer registered VBO
   // as the vertex attribute's bound vertex buffer object so afterwards we can
@@ -202,37 +229,49 @@ int main(void) {
   // Note that finding the uniform location does not require you to use the
   // shader program first, but updating a uniform does require you to first use
   // the program.  If it returns -1, it could not find the location.
-  GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+  /* GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor"); */
+#else
+  (void) vertexShaderSource;
+  (void) fragmentShaderSource;
+#endif // TR_DADA
 
-  // render loop
-  while (!glfwWindowShouldClose(window)) {
-    // Input
-    processInput(window);
+  {
+    Cube cube{};
 
-    // Render
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // state-setting
-    glClear(GL_COLOR_BUFFER_BIT); // state-using
+    // render loop
+    while (!glfwWindowShouldClose(window)) {
+      // Input
+      processInput(window);
 
-    {
-      // Draw triangle.
-      glUseProgram(shaderProgram);
-      glBindVertexArray(VAO);
+      // Render
+      glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // state-setting
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using
 
+      #if TR_DADA
       {
-        // update shader uniform
-        double timeValue = glfwGetTime();
-        GLfloat greenValue = static_cast<GLfloat>(sin(timeValue) / 2.0 + 0.5);
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        // Draw triangle.
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+
+        /* {
+          // update shader uniform
+          double timeValue = glfwGetTime();
+          GLfloat greenValue = static_cast<GLfloat>(sin(timeValue) / 2.0 + 0.5);
+          glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        } */
+
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0); // No need to unbind it every time
       }
+      #endif
 
-      // glDrawArrays(GL_TRIANGLES, 0, 3);
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-      glBindVertexArray(0); // No need to unbind it every time
+      cube.Render(window);
+
+      // GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+      glfwSwapBuffers(window);
+      glfwPollEvents();
     }
-
-    // GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-    glfwSwapBuffers(window);
-    glfwPollEvents();
   }
 
   GLint nrAttributes;
@@ -240,9 +279,11 @@ int main(void) {
   // OpenGL guarantees 16 at least 16 4-component vertex attributes.
   std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
+#if TR_DADA
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   glDeleteProgram(shaderProgram);
+#endif
 
   // Clearing all previously allocated GLFW resources.
   glfwDestroyWindow(window);

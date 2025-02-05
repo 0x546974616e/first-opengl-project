@@ -7,6 +7,7 @@
 - <https://learnopengl.com/book/book_pdf.pdf>
 - <https://github.com/JoeyDeVries/LearnOpenGL>
 - <https://antongerdelan.net/opengl/index.html>
+- <https://github.com/PacktPublishing/3D-Graphics-Rendering-Cookbook>
 - <https://www.opengl-tutorial.org/>
 - <https://open.gl/>
 
@@ -19,11 +20,20 @@
 - <http://github.com/Dav1dde/glad>
 - <http://glad.dav1d.de/>
 
-# GLFW
+## GLFW
 
 - <https://www.glfw.org/docs/3.3/compile.html>
 - <https://www.glfw.org/docs/latest/window.html#window_hints>
 - <https://github.com/JoeyDeVries/LearnOpenGL/tree/master/src>
+
+## GLM
+
+- <https://github.com/g-truc/glm>
+- <https://github.com/g-truc/glm/releases/>
+
+## STB Image
+
+- <https://github.com/nothings/stb/blob/master/stb_image.h>
 
 ## Loader & Build
 

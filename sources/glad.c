@@ -7,7 +7,7 @@
     APIs: gl=4.6
     Profile: core
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -189,7 +189,7 @@ static int get_exts(void) {
         }
 
         for(index = 0; index < num_exts_i; index++) {
-            const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
+            const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, (GLuint)index);
             size_t len = strlen(gl_str_tmp);
 
             char *local_str = (char*)malloc((len+1) * sizeof(char));
@@ -1830,4 +1830,3 @@ int gladLoadGLLoader(GLADloadproc load) {
 	if (!find_extensionsGL()) return 0;
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
-
