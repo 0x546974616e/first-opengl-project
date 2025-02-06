@@ -3,6 +3,7 @@
 
 #include <glad/glad.h> // OpenGL API
 #include <GLFW/glfw3.h> // GLFW API
+#include <glm/mat4x4.hpp>
 
 #define TR_PLANE 0
 
@@ -18,9 +19,14 @@ private:
   GLuint m_EBO; // Element Buffer Object;
 #endif
 
+  glm::mat4 m_model{1.0f};
+
 public:
   Cube(void); ~Cube(void);
   void Render(GLFWwindow* window);
+  void setModel(glm::mat4 const& model) {
+    m_model = model;
+  }
 };
 
 #endif // TR_CUBE_HPP

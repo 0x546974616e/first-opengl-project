@@ -267,14 +267,14 @@ void Cube::Render(GLFWwindow* window) {
   // GLint transformLoc = glGetUniformLocation(m_shaderProgram, "transform");
   // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-  glm::mat4 model = glm::mat4(1.0f); // Identity
+  // glm::mat4 model = glm::mat4(1.0f); // Identity
   glm::mat4 view  = glm::mat4(1.0f); // Identity
   glm::mat4 proj  = glm::mat4(1.0f); // Identity
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
 
-  model = glm::rotate(model, (float )glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+  // model = glm::rotate(model, (float )glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
   view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
   proj  = glm::perspective(glm::radians(45.0f), (float) width / (float) height, 0.1f, 100.0f);
 
@@ -283,8 +283,8 @@ void Cube::Render(GLFWwindow* window) {
   GLint viewLocation  = glGetUniformLocation(m_shaderProgram, "view");
   GLint projLocation  = glGetUniformLocation(m_shaderProgram, "proj");
 
-  // Pass them to the shaders (2 different ways)
-  glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &model[0][0]);
+  // Pass them to the shaders (&view[0][0])
+  glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(m_model));
   glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 
