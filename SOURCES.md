@@ -35,6 +35,15 @@
 
 - <https://github.com/nothings/stb/blob/master/stb_image.h>
 
+## Dear ImGUI
+
+- <https://github.com/ocornut/imgui>
+- <https://github.com/ocornut/imgui/tree/master/examples>
+- <https://github.com/ocornut/imgui/wiki/Getting-Started>
+- <https://github.com/ocornut/imgui/wiki/Useful-Extensions>
+- <https://github.com/ocornut/imgui/wiki/Multi-Viewports>
+- <https://github.com/ocornut/imgui/wiki/Docking>
+
 ## Loader & Build
 
 - <https://www.khronos.org/opengl/wiki/Load_OpenGL_Functions>
