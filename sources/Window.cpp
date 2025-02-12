@@ -9,13 +9,15 @@
 #include <optional> // std::optional{}, std::nullopt
 #include <utility> // std::in_place
 
-#include "Event.hpp" // Self{}
-#include "Window.hpp" // Self{}
+#include "Event.hpp" // Event{}
+#include "Window.hpp" // Window{}
+#include "Log.hpp" // TR_ERROR(), GlobalLog(), GlobalLogRender()
+#include "helper.hpp" // NOEXCEPT
 
 #define TR_TITLE "[OpenGL] First Project"
 
 static void ErrorCallback(int error, const char* description) {
-  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+  GlobalLog(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 void Window::KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) NOEXCEPT {
@@ -30,6 +32,13 @@ void Window::KeyboardCallback(GLFWwindow* window, int key, int scancode, int act
   else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
     if (!source->m_navigationMode) source->ToggleNavigationMode(true);
   }
+
+  if (source->m_navigationMode && key == GLFW_KEY_H && action == GLFW_PRESS) {
+    GLint polygonMode[2]; // .[1] = GL_FILL | GL_LINE | GL_POINT
+    glGetIntegerv(GL_POLYGON_MODE, polygonMode);
+    // GL_FRONT_AND_BACK: apply it to the front and back of all triangles.
+    glPolygonMode(GL_FRONT_AND_BACK, polygonMode[1] == GL_FILL ? GL_LINE : GL_FILL);
+  }
 }
 
 void Window::MouseCallback(GLFWwindow* window, double x, double y) NOEXCEPT {
@@ -39,6 +48,7 @@ void Window::MouseCallback(GLFWwindow* window, double x, double y) NOEXCEPT {
 
   if (source->m_navigationMode) {
     MouseEvent event;
+    // TODO: Current/Elapsed per event.
     double currentTime = glfwGetTime();
     event.currentTime = currentTime,
     event.elapsedTime = currentTime - source->m_currentTime,
@@ -54,6 +64,7 @@ void Window::ScrollCallback(GLFWwindow* window, double x, double y) NOEXCEPT {
 
   if (source->m_navigationMode) {
     ScrollEvent event;
+    // TODO: Current/Elapsed per event.
     double currentTime = glfwGetTime();
     event.currentTime = currentTime,
     event.elapsedTime = currentTime - source->m_currentTime,
@@ -83,6 +94,7 @@ std::optional<Window> Window::Create(void) NOEXCEPT {
     return std::nullopt;
   }
 
+  TR_DEBUG("GLFW initialised.");
   glfwMaximizeWindow(window);
   glfwMakeContextCurrent(window);
   // TODO: What is vertical synchronization?
@@ -94,6 +106,7 @@ std::optional<Window> Window::Create(void) NOEXCEPT {
     return std::nullopt;
   }
 
+  TR_DEBUG("GLAD initialised.");
   glEnable(GL_DEPTH_TEST);
   TR_DEBUG(
     "OpenGL Version %d.%d"
@@ -129,6 +142,8 @@ Window::Window(GLFWwindow* window) NOEXCEPT
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(TR_GLSL_VERSION);
+  TR_DEBUG("ImGui initialised.");
+  TR_ERROR("Test error message");
 }
 
 Window::~Window(void) NOEXCEPT {
@@ -143,6 +158,7 @@ Window::~Window(void) NOEXCEPT {
 }
 
 bool Window::MainLoop(void) NOEXCEPT {
+  TR_DEBUG("Start MainLoop.");
   while (!glfwWindowShouldClose(m_window)) {
     double currentTime = glfwGetTime();
     m_elapsedTime = currentTime - m_currentTime;
@@ -197,6 +213,7 @@ void Window::ToggleNavigationMode(bool enter) NOEXCEPT {
 void Window::ProcessInput(void) NOEXCEPT {
   if (m_navigationMode) {
     KeyboardEvent event;
+    // TODO: Current/Elapsed per event.
     event.currentTime = m_currentTime;
     event.elapsedTime = m_elapsedTime;
     event.keyA = glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS;
@@ -210,11 +227,11 @@ void Window::ProcessInput(void) NOEXCEPT {
 }
 
 void Window::RenderUi(void) NOEXCEPT {
-  static char const* const s_leftPanel = "LeftPanel";
-  static char const* const s_rightPanel = "RightPannel";
-  static char const* const s_bottomPanel = "BottomPanel";
-  static char const* const s_centralPanel = "CentralPanel";
-  static char const* const s_theme = "Theme";
+  static char const* s_sceneTitle = "Scene";
+  static char const* s_inspectorTitle = "Inspector";
+  static char const* s_propertiesTitle = "Properties";
+  static char const* s_themeTitle = "Theme";
+  static char const* s_logTitle = "Logs";
 
   ImGuiDockNodeFlags dockSpaceFlags = (0
     | ImGuiDockNodeFlags_NoDockingInCentralNode
@@ -254,17 +271,30 @@ void Window::RenderUi(void) NOEXCEPT {
     ImGui::DockBuilderAddNode(m_dockSpaceId, dockSpaceFlags | ImGuiDockNodeFlags_DockSpace);
     ImGui::DockBuilderSetNodeSize(m_dockSpaceId, viewport->Size);
 
-    ImGuiID mainId = m_dockSpaceId;
-    ImGuiID dockLeftId, dockRightId, dockBottomId, dockCentralId;
-    ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Right, 0.2f, &dockRightId, &mainId);
-    ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.2f, &dockBottomId, &mainId);
-    ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.2f, &dockLeftId, &dockCentralId);
+    #if 0 // NOTE: TMP
+      ImGuiID mainId = m_dockSpaceId;
+      ImGuiID dockLeftId, dockRightId, dockBottomId, dockCentralId;
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Right, 0.2f, &dockRightId, &mainId); // M|R
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.2f, &dockBottomId, &mainId); // M\B
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.2f, &dockLeftId, &dockCentralId); // L|C
+      ImGui::DockBuilderDockWindow(s_sceneTitle, dockCentralId);
+      ImGui::DockBuilderDockWindow(s_inspectorTitle, dockLeftId);
+      ImGui::DockBuilderDockWindow(s_propertiesTitle, dockRightId);
+      ImGui::DockBuilderDockWindow(s_themeTitle, dockRightId);
+      ImGui::DockBuilderDockWindow(s_logTitle, dockBottomId);
+    #else
+      ImGuiID mainId = m_dockSpaceId;
+      ImGuiID leftId, sceneId, logId, topId, bottomId;
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.2f, &leftId, &mainId); // L|M
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.225f, &logId, &sceneId); // S\l
+      ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Up, 0.5f, &topId, &bottomId); // T\B
+      ImGui::DockBuilderDockWindow(s_sceneTitle, sceneId);
+      ImGui::DockBuilderDockWindow(s_logTitle, logId);
+      ImGui::DockBuilderDockWindow(s_themeTitle, topId);
+      ImGui::DockBuilderDockWindow(s_propertiesTitle, topId);
+      ImGui::DockBuilderDockWindow(s_inspectorTitle, bottomId);
+    #endif
 
-    ImGui::DockBuilderDockWindow(s_leftPanel, dockLeftId);
-    ImGui::DockBuilderDockWindow(s_rightPanel, dockRightId);
-    ImGui::DockBuilderDockWindow(s_bottomPanel, dockBottomId);
-    ImGui::DockBuilderDockWindow(s_centralPanel, dockCentralId);
-    ImGui::DockBuilderDockWindow(s_theme, dockRightId);
     ImGui::DockBuilderFinish(m_dockSpaceId);
   }
 
@@ -288,76 +318,91 @@ void Window::RenderUi(void) NOEXCEPT {
   ImGui::DockSpace(m_dockSpaceId, ImVec2(0.0f, 0.0f), dockSpaceFlags);
   ImGui::End();
 
+  DrawScene(s_sceneTitle);
+  DrawInspector(s_inspectorTitle);
+  DrawProperties(s_propertiesTitle);
+  DrawTheme(s_themeTitle);
+  DrawLogs(s_logTitle);
+}
+
+void Window::DrawScene(char const* title) NOEXCEPT {
+  ImGuiWindowClass centralAlways;
+  centralAlways.DockNodeFlagsOverrideSet |= (0
+    | ImGuiDockNodeFlags_NoTabBar
+    | ImGuiDockNodeFlags_NoDockingOverMe
+    | ImGuiDockNodeFlags_NoUndocking
+    | ImGuiDockNodeFlags_NoCloseButton
+    | ImGuiDockNodeFlags_NoWindowMenuButton
+  );
+
+  ImGui::SetNextWindowClass(&centralAlways);
+  ImGui::SetNextWindowDockID(m_dockSpaceId, ImGuiCond_Always);
+  ImGui::SetNextWindowBgAlpha(0);
+
+  if (ImGui::Begin(title, NULL, ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::IsWindowFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+      if (!m_navigationMode) ToggleNavigationMode(true);
+    }
+
+    ImGuiWindowFlags hintFlags = (0
+      | ImGuiWindowFlags_AlwaysAutoResize
+      | ImGuiWindowFlags_NoDecoration
+      | ImGuiWindowFlags_NoDocking
+      | ImGuiWindowFlags_NoFocusOnAppearing
+      | ImGuiWindowFlags_NoMove
+      | ImGuiWindowFlags_NoNav
+      | ImGuiWindowFlags_NoSavedSettings
+    );
+
+    ImGui::SetNextWindowBgAlpha(0.35f);
+    ImGui::SetNextWindowPos(
+      ImGui::GetWindowPos()
+      + ImGui::GetWindowSize()
+      - ImGui::GetStyle().WindowPadding
+      , ImGuiCond_Always
+      , ImVec2(1.0f, 1.0f)
+    );
+
+    ImGui::Begin("Navigation Hint", NULL, hintFlags);
+    if (m_navigationMode) ImGui::Text("Press <Escape> to leave Navigation mode");
+    else ImGui::Text("Press <i> or <Double-Click> to enter Navigation mode");
+    ImGui::End();
+  }
+  ImGui::End();
+}
+
+void Window::DrawInspector(char const* title) NOEXCEPT {
   static bool showDemoWindow = false;
   if (showDemoWindow) {
     ImGui::ShowDemoWindow();
   }
 
-  if (ImGui::Begin(s_leftPanel)) {
-    ImGui::Checkbox("Demo Window", &showDemoWindow);
-  }
-  ImGui::End();
-
-  if (ImGui::Begin(s_bottomPanel)) {
+  if (ImGui::Begin(title)) {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text(
       "Average %.3f ms/frame (%.1f FPS)",
       1000.0f / io.Framerate, io.Framerate
     );
+
+    ImGui::Checkbox("Demo Window", &showDemoWindow);
   }
   ImGui::End();
+}
 
-  if (ImGui::Begin(s_rightPanel)) {
-    ImGui::Text("dada");
+void Window::DrawProperties(char const* title) NOEXCEPT {
+  if (ImGui::Begin(title)) {
+    ImGui::Text("Properties");
+    ImGui::Text("Camera, Cube, ...");
   }
   ImGui::End();
-  m_theme.EditTheme(s_theme);
+}
 
-  {
-    ImGuiWindowClass centralAlways;
-    centralAlways.DockNodeFlagsOverrideSet |= (0
-      | ImGuiDockNodeFlags_NoTabBar
-      | ImGuiDockNodeFlags_NoDockingOverMe
-      | ImGuiDockNodeFlags_NoUndocking
-      | ImGuiDockNodeFlags_NoCloseButton
-      | ImGuiDockNodeFlags_NoWindowMenuButton
-    );
+void Window::DrawTheme(char const* title) NOEXCEPT {
+  m_theme.EditTheme(title);
+}
 
-    ImGui::SetNextWindowClass(&centralAlways);
-    ImGui::SetNextWindowDockID(m_dockSpaceId, ImGuiCond_Always);
-    ImGui::SetNextWindowBgAlpha(0);
-
-    if (ImGui::Begin(s_centralPanel, NULL, ImGuiWindowFlags_NoBackground)) {
-      if (ImGui::IsWindowFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-        if (!m_navigationMode) ToggleNavigationMode(true);
-      }
-
-      ImGuiWindowFlags hintFlags = (0
-        | ImGuiWindowFlags_AlwaysAutoResize
-        | ImGuiWindowFlags_NoDecoration
-        | ImGuiWindowFlags_NoDocking
-        | ImGuiWindowFlags_NoFocusOnAppearing
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoNav
-        | ImGuiWindowFlags_NoSavedSettings
-      );
-
-      ImGui::SetNextWindowBgAlpha(0.35f);
-      ImGui::SetNextWindowPos(
-        ImGui::GetWindowPos()
-        + ImGui::GetWindowSize()
-        - ImGui::GetStyle().WindowPadding
-        , ImGuiCond_Always
-        , ImVec2(1.0f, 1.0f)
-      );
-
-      ImGui::Begin("Example: Simple overlay", NULL, hintFlags);
-      if (m_navigationMode) ImGui::Text("Press <Escape> to leave Navigation mode");
-      else ImGui::Text("Press <i> or Double-Click to enter Navigation mode");
-      ImGui::End();
-    }
-    ImGui::End();
-  }
+void Window::DrawLogs(char const* title) NOEXCEPT {
+  GlobalLogRender(title);
 }
 
 void Window::RenderEngine(void) NOEXCEPT {

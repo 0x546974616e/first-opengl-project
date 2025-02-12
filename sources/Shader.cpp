@@ -7,10 +7,11 @@
 #include <sstream> // std::stringstream{}
 #include <string> // std::string{}
 
-#include "helper.hpp" // TR_ERROR()
+#include "helper.hpp" // NOEXCEPT
 #include "Shader.hpp" // Self{}
+#include "Log.hpp" // TR_ERROR()
 
-void Shader::Attach(GLenum type, std::string_view source) noexcept {
+void Shader::Attach(GLenum type, std::string_view source) NOEXCEPT {
   GLint status, length;
   GLuint shader = glCreateShader(type);
   char const* data = source.data();
@@ -30,7 +31,7 @@ void Shader::Attach(GLenum type, std::string_view source) noexcept {
   glDeleteShader(shader);
 }
 
-void Shader::Attach(std::string_view filename) noexcept {
+void Shader::Attach(std::string_view filename) NOEXCEPT {
   size_t index = filename.rfind(".");
   if (index == std::string_view::npos) {
     TR_ERROR("Shader extension is missing: %s", filename.data());
@@ -56,12 +57,12 @@ void Shader::Attach(std::string_view filename) noexcept {
   Attach(type, source);
 }
 
-void Shader::Link(void) noexcept {
-  GLint status, length;
+void Shader::Link(void) NOEXCEPT {
+  GLint length;
   glLinkProgram(m_program);
 
-  glGetProgramiv(m_program, GL_LINK_STATUS, &status);
-  if(status == GL_FALSE) {
+  glGetProgramiv(m_program, GL_LINK_STATUS, &m_status);
+  if(m_status == GL_FALSE) {
     glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length);
     std::unique_ptr<char[]> buffer(new char[static_cast<size_t>(length)]);
     glGetProgramInfoLog(m_program, length, NULL, buffer.get());

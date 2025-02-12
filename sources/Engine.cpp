@@ -7,8 +7,6 @@
 #include "Engine.hpp" // Engine{}
 #include "helper.hpp" // TR_ARRAYSIZE()
 
-#include <cstdio> // fprintf(), stdout
-
 static glm::vec3 positions[] = {
   glm::vec3( 0.0f, 0.0f, 0.0f),
   glm::vec3( 2.0f, 5.0f, -15.0f),
@@ -23,7 +21,7 @@ static glm::vec3 positions[] = {
 };
 
 void Engine::Render(Event event) NOEXCEPT {
-  // TR_DEBUG("Array Size: %zu", TR_ARRAYSIZE(positions));
+  m_grid.Render(m_camera);
   for (size_t i = 0u; i < TR_ARRAYSIZE(positions); ++i) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, positions[i]);

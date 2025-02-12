@@ -24,6 +24,10 @@ public:
     return static_cast<float>(m_width) / static_cast<float>(m_height);
   }
 
+  constexpr glm::vec3 Position(void) const NOEXCEPT {
+    return m_position;
+  }
+
   constexpr glm::mat4 LookAt(void) const NOEXCEPT {
     return glm::lookAt(
       m_position, // Eye/Position
@@ -48,7 +52,7 @@ protected:
   bool m_firstMouse = true;
   MouseEvent m_lastMouse;
 
-  glm::vec3 m_position = { 0.0, 0.0, 3.0 };
+  glm::vec3 m_position = { 0.0, 1.0, 3.0 };
   glm::vec3 m_target = { 0.0, 0.0, -1.0 };
   glm::vec3 m_cross = { 0.0, 1.0, 0.0 };
 

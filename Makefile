@@ -41,7 +41,7 @@ CXX = clang++-19
 # TODO: See OpenSSF, -pedantic
 MACRO_EXPORT = ROOT_DIR RESOURCES_DIR
 COMMON_FLAGS = -Wall -Wextra -Wconversion -Werror -O0 \
-	-Wno-unused-parameter -Wno-unused-variable          \
+	-Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field \
 	$(foreach macro,$(MACRO_EXPORT), -D TR_$(macro)='"$($(macro))"')
 
 CCC_FLAGS = $(COMMON_FLAGS) -std=c23

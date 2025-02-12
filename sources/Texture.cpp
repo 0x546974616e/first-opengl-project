@@ -4,10 +4,11 @@
 #include <string> // std::string{}
 #include <string_view> // std::string_view{}
 
-#include "helper.hpp" // TR_ERROR()
+#include "helper.hpp" // NOEXCEPT
 #include "Texture.hpp" // Self{}
+#include "Log.hpp" // TR_DEBUG()
 
-Texture::Texture(std::string_view filename) noexcept {
+Texture::Texture(std::string_view filename) NOEXCEPT {
   glGenTextures(1, &m_texture);
   glBindTexture(GL_TEXTURE_2D, m_texture);
 

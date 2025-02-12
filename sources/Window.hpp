@@ -36,6 +36,13 @@ public:
   void RenderEngine(void) NOEXCEPT;
 
 private:
+  void DrawScene(char const* title) NOEXCEPT;
+  void DrawInspector(char const* title) NOEXCEPT;
+  void DrawProperties(char const* title) NOEXCEPT;
+  void DrawTheme(char const* title) NOEXCEPT;
+  void DrawLogs(char const* title) NOEXCEPT;
+
+private:
   TR_DELETE_COPY_CTOR(Window);
   TR_DELETE_MOVE_CTOR(Window);
 

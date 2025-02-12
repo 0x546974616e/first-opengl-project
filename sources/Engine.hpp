@@ -4,7 +4,9 @@
 #include "helper.hpp" // NOEXCEPT
 #include "Camera.hpp" // Camera{}
 #include "Event.hpp" // Event{}
+
 #include "Cube.hpp" // Cube{}
+#include "Grid.hpp" // Grid{}
 
 class Engine final {
 public:
@@ -23,7 +25,9 @@ public:
 
 private:
   Camera m_camera{};
+
   Cube m_cube{};
+  Grid m_grid{};
 };
 
 #endif // TR_ENGINE_HPP

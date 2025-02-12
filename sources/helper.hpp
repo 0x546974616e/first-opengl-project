@@ -23,17 +23,16 @@
 #define TR_DELETE_COPY_CTOR(CLASS) TR_DELETE_CTOR(CLASS, const&)
 #define TR_DELETE_MOVE_CTOR(CLASS) TR_DELETE_CTOR(CLASS, &&)
 
-// __FILE_NAME__ is not standard.
-// https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
-// https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
-#define TR_FPRINTF(STREAM, FORMAT, ...)                             \
-  fprintf(STREAM,                                                   \
-    __FILE_NAME__ ":%s():" TR_STRINGIFY(__LINE__) ": " FORMAT "\n", \
-    __func__, ##__VA_ARGS__                                         \
-  )
-
-#define TR_DEBUG(FORMAT, ...) TR_FPRINTF(stdout, FORMAT, ##__VA_ARGS__)
-#define TR_ERROR(FORMAT, ...) TR_FPRINTF(stderr, FORMAT, ##__VA_ARGS__)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define TR_FMTARGS(POSITION) __attribute__((format(gnu_printf, POSITION, POSITION+1)))
+#define TR_FMTLIST(POSITION) __attribute__((format(gnu_printf, POSITION, 0)))
+#elif defined(__clang__) || defined(__GNUC__)
+#define TR_FMTARGS(POSITION) __attribute__((format(printf, POSITION, POSITION+1)))
+#define TR_FMTLIST(POSITION) __attribute__((format(printf, POSITION, 0)))
+#else
+#define TR_FMTARGS(POSITION)
+#define TR_FMTLIST(POSITION)
+#endif
 
 #define TR_ASSERT(EXPRESSION) assert(EXPRESSION)
 #define TR_ASSERT_RECOVERABLE(EXPRESSION)          \

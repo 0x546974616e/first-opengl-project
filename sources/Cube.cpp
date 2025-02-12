@@ -27,9 +27,9 @@ static char const* CubeVertexShader = R"(
   out vec2 tr_Texture;
   uniform mat4 model;
   uniform mat4 view;
-  uniform mat4 proj;
+  uniform mat4 projection;
   void main() {
-    gl_Position = proj * view * model * vec4(position, 1.0f);
+    gl_Position = projection * view * model * vec4(position, 1.0f);
     tr_Color = color;
     tr_Texture = uv;
   }
@@ -115,10 +115,10 @@ Cube::Cube(void) noexcept
   glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
 
   glVertexAttribPointer(LOCATION0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*) (0 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(LOCATION0);
   glVertexAttribPointer(LOCATION1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*) (3 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(LOCATION1);
   glVertexAttribPointer(LOCATION2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*) (6 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(LOCATION0);
+  glEnableVertexAttribArray(LOCATION1);
   glEnableVertexAttribArray(LOCATION2);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -126,6 +126,8 @@ Cube::Cube(void) noexcept
   m_shader.Use();
   m_shader.Bind("texture1", TEXTURE_UNIT0);
   m_shader.Bind("texture2", TEXTURE_UNIT1);
+
+  TR_DEBUG("Cube created.");
 }
 
 void Cube::Render(Camera const& camera) NOEXCEPT {
@@ -137,7 +139,7 @@ void Cube::Render(Camera const& camera) NOEXCEPT {
   glBindVertexArray(m_VAO);
   m_shader.Bind("model", m_model);
   m_shader.Bind("view", camera.LookAt());
-  m_shader.Bind("proj", camera.Projection());
+  m_shader.Bind("projection", camera.Projection());
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }
