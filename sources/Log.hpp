@@ -4,8 +4,10 @@
 #include <cstdio> // FILE
 #include "helper.hpp" // TR_FMTARGS()
 
+TR_BEGIN_NAMESPACE()
+
 /// Render logs into an ImGui window.
-void GlobalLogRender(char const* title) NOEXCEPT;
+void GlobalLogRender(char const* title, bool* open = NULL) NOEXCEPT;
 void GlobalLog(FILE* stream, char const* format, ...) NOEXCEPT TR_FMTARGS(2);
 
 // __FILE_NAME__ is not standard.
@@ -19,5 +21,7 @@ void GlobalLog(FILE* stream, char const* format, ...) NOEXCEPT TR_FMTARGS(2);
 
 #define TR_DEBUG(FORMAT, ...) TR_FPRINTF(stdout, FORMAT, ##__VA_ARGS__)
 #define TR_ERROR(FORMAT, ...) TR_FPRINTF(stderr, FORMAT, ##__VA_ARGS__)
+
+TR_END_NAMESPACE()
 
 #endif // TR_LOG_HPP

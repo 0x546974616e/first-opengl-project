@@ -6,11 +6,13 @@
 #include "helper.hpp" // NOEXCEPT
 #include "Log.hpp"
 
+TR_BEGIN_NAMESPACE()
+
 void Camera::RenderUi(void) NOEXCEPT {
   bool update = false;
   ImGui::SeparatorText("Controls");
 
-  ImGui::DragFloat("FOV", &m_fov, 1.0f, 1.0f, 45.0f, "%.0f");
+  ImGui::DragFloat("FOV", &m_fov, 1.0f, 1.0f, 89.0f, "%.0f");
   ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.1f, 50.0f, "%.1f");
 
   float planes[2] = { m_near, m_far };
@@ -62,7 +64,7 @@ void Camera::ProcessMouse(MouseEvent event) NOEXCEPT {
 
 void Camera::ProcessScroll(ScrollEvent event) NOEXCEPT {
   m_fov -= static_cast<float>(event.yOffset);
-  m_fov = TR_CLAMP(m_fov, 1.0, 45.0);
+  m_fov = TR_CLAMP(m_fov, 1.0, 89.0);
 }
 
 void Camera::ProcessKeyboard(KeyboardEvent event) NOEXCEPT {
@@ -80,3 +82,5 @@ void Camera::ProcessKeyboard(KeyboardEvent event) NOEXCEPT {
   if (event.keyA) m_position -= glm::normalize(glm::cross(m_target, m_cross)) * cameraSpeed;
   if (event.keyD) m_position += glm::normalize(glm::cross(m_target, m_cross)) * cameraSpeed;
 }
+
+TR_END_NAMESPACE()

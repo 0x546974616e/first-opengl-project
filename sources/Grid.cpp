@@ -3,11 +3,14 @@
 #include "ImGuiCustom.hpp"
 
 #include <glad/glad.h> // OpenGL API
+#include <glm/gtc/type_ptr.hpp> // glm::make_vec4()
 
 #include "Grid.hpp" // Grid{}
 #include "Camera.hpp" // Camera{}
 #include "Shader.hpp" // Shader{}
 #include "helper.hpp" // NOEXCEPT
+
+TR_BEGIN_NAMESPACE()
 
 Grid::Grid(void) NOEXCEPT: m_VAO(0u), m_flags(GRID_NONE) {
   m_flags = static_cast<Flags>(SHOW_GRID | GRID_AXIS_X | GRID_AXIS_Z | GRID_PLANE_XZ);
@@ -32,11 +35,29 @@ void Grid::RenderUi(void) NOEXCEPT {
   static ImU64 axisFlags[3] = { GRID_AXIS_X, GRID_AXIS_Y, GRID_AXIS_Z };
   static ImU64 planeFlags[3] = { GRID_PLANE_XY, GRID_PLANE_YZ, GRID_PLANE_XZ };
 
-  ImGui::CheckboxFlags("Show Grid", &show, SHOW_GRID);
   ImGui::ButtonFlagsGroup("Axis", &axis, axisFlags, axisLabels, 3);
   ImGui::ButtonFlagsGroup("Plane", &plane, planeFlags, planeLabels, 3, ImGuiButtonFlagsGroup_Exclusive);
+  ImGui::CheckboxFlags("Show Grid", &show, SHOW_GRID);
 
   m_flags = static_cast<Flags>(show | axis | plane);
+}
+
+void Grid::OnThemeUpdate(Theme& theme) NOEXCEPT {
+  m_shader.Use();
+  // TODO: Probably temporary
+  ImVec4 colorGrid         = theme.Get(Theme::ColorGrid);
+  ImVec4 colorGridEmphasis = theme.Get(Theme::ColorGridEmphasis);
+
+  m_shader.Bind("tr_colorGrid"        , glm::make_vec4(&colorGrid.x));
+  m_shader.Bind("tr_colorGridEmphasis", glm::make_vec4(&colorGridEmphasis.x));
+
+  ImVec4 colorAxisX = theme.Get(Theme::ColorAxisX);
+  ImVec4 colorAxisY = theme.Get(Theme::ColorAxisY);
+  ImVec4 colorAxisZ = theme.Get(Theme::ColorAxisZ);
+
+  m_shader.Bind("tr_colorGridAxisX", glm::make_vec4(&colorAxisX.x));
+  m_shader.Bind("tr_colorGridAxisY", glm::make_vec4(&colorAxisY.x));
+  m_shader.Bind("tr_colorGridAxisZ", glm::make_vec4(&colorAxisZ.x));
 }
 
 // TODO: Render the othogonal axis to the current plane when requested.
@@ -57,3 +78,5 @@ void Grid::Render(Camera const& camera) NOEXCEPT {
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
 }
+
+TR_END_NAMESPACE()

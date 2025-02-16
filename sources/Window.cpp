@@ -17,6 +17,8 @@
 
 #define TR_TITLE "[OpenGL] First Project"
 
+TR_BEGIN_NAMESPACE()
+
 static void ErrorCallback(int error, const char* description) {
   GlobalLog(stderr, "GLFW Error %d: %s\n", error, description);
 }
@@ -35,10 +37,7 @@ void Window::KeyboardCallback(GLFWwindow* window, int key, int scancode, int act
   }
 
   if (source->m_navigationMode && key == GLFW_KEY_H && action == GLFW_PRESS) {
-    GLint polygonMode[2]; // .[1] = GL_FILL | GL_LINE | GL_POINT
-    glGetIntegerv(GL_POLYGON_MODE, polygonMode);
-    // GL_FRONT_AND_BACK: apply it to the front and back of all triangles.
-    glPolygonMode(GL_FRONT_AND_BACK, polygonMode[1] == GL_FILL ? GL_LINE : GL_FILL);
+    source->ToggleWireframeMode();
   }
 }
 
@@ -145,8 +144,7 @@ Window::Window(GLFWwindow* window) NOEXCEPT
 
   ImGui::StyleColorsDark();
   ImGuiStyle& style = ImGui::GetStyle(); (void) style;
-  style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-  m_theme.ApplyTheme();
+  m_theme.Apply(); m_engine.OnThemeUpdate(m_theme);
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(TR_GLSL_VERSION);
@@ -216,6 +214,15 @@ void Window::ToggleNavigationMode(bool enter) NOEXCEPT {
     m_navigationMode = false;
     m_engine.UnFocus();
   }
+}
+
+void Window::ToggleWireframeMode(void) NOEXCEPT {
+  // GLint polygonMode[2]; // .[1] = GL_FILL | GL_LINE | GL_POINT
+  // glGetIntegerv(GL_POLYGON_MODE, polygonMode);
+
+  m_wireframeMode = !m_wireframeMode;
+  // GL_FRONT_AND_BACK: apply it to the front and back of all triangles.
+  glPolygonMode(GL_FRONT_AND_BACK, m_wireframeMode ? GL_LINE : GL_FILL);
 }
 
 void Window::ProcessInput(void) NOEXCEPT {
@@ -320,19 +327,49 @@ void Window::RenderUi(void) NOEXCEPT {
   DrawProperties(s_propertiesTitle);
   DrawTheme(s_themeTitle);
   DrawLogs(s_logTitle);
+
+  if (m_demoOpen) ImGui::ShowDemoWindow(&m_demoOpen);
+  if (m_styleOpen) {
+    // Viewport can never be NULL.
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::SetNextWindowSize(Min(viewport->Size * 0.8f, ImVec2(500, 800)), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Style Editor", &m_styleOpen);
+    ImGui::ShowStyleEditor();
+    ImGui::End();
+  }
 }
 
 void Window::DrawMenuBar(void) NOEXCEPT {
   if (ImGui::BeginMenuBar()) {
+
     if (ImGui::BeginMenu("File")) {
       if (ImGui::MenuItem("Test Debug", "Ctrl+O")) { TR_DEBUG("Test Debug Message"); }
       if (ImGui::MenuItem("Test Error", "Ctrl+S")) { TR_ERROR("Test Error Message"); }
       ImGui::Separator();
-      if (ImGui::MenuItem("Exit", "Escape")) {
-        glfwSetWindowShouldClose(m_window, true);
-      }
+      if (ImGui::MenuItem("Exit", "Escape")) glfwSetWindowShouldClose(m_window, true);
       ImGui::EndMenu();
     }
+
+    if (ImGui::BeginMenu("View")) {
+      // TODO: Implement actual full screen.
+      if (ImGui::MenuItem("Full Screen")) {
+        m_themeOpen = m_propertiesOpen = m_inspectorOpen = m_logOpen = false;
+        m_demoOpen = m_styleOpen = false;
+      }
+
+      ImGui::SeparatorText("Window");
+      ImGui::MenuItem("Theme", NULL, &m_themeOpen);
+      ImGui::MenuItem("Properties", NULL, &m_propertiesOpen);
+      ImGui::MenuItem("Inspector", NULL, &m_inspectorOpen);
+      ImGui::MenuItem("Logs", NULL, &m_logOpen);
+      ImGui::SeparatorText("ImGui");
+      ImGui::MenuItem("Demo Window", NULL, &m_demoOpen);
+      ImGui::MenuItem("Style Editor", NULL, &m_styleOpen);
+      ImGui::EndMenu();
+    }
+
     ImGui::EndMenuBar();
   }
 }
@@ -389,36 +426,43 @@ void Window::DrawScene(char const* title) NOEXCEPT {
 }
 
 void Window::DrawInspector(char const* title) NOEXCEPT {
-  static bool showDemoWindow = false;
-  if (showDemoWindow) {
-    ImGui::ShowDemoWindow(&showDemoWindow);
-  }
-
-  if (ImGui::Begin(title)) {
+  if (!m_inspectorOpen) return;
+  if (ImGui::Begin(title, &m_inspectorOpen)) {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text(
       "Average %.3f ms/frame (%.1f FPS)",
       1000.0f / io.Framerate, io.Framerate
     );
 
-    ImGui::Checkbox("Demo Window", &showDemoWindow);
+    bool wireframeMode = m_wireframeMode;
+    if (ImGui::Checkbox("Wireframe", &wireframeMode)) {
+      ToggleWireframeMode();
+    }
   }
   ImGui::End();
 }
 
 void Window::DrawProperties(char const* title) NOEXCEPT {
-  if (ImGui::Begin(title)) {
+  if (!m_propertiesOpen) return;
+  if (ImGui::Begin(title, &m_propertiesOpen)) {
     m_engine.RenderUi();
   }
   ImGui::End();
 }
 
 void Window::DrawTheme(char const* title) NOEXCEPT {
-  m_theme.EditTheme(title);
+  if (!m_themeOpen) return;
+  if (ImGui::Begin(title, &m_themeOpen)) {
+    if (m_theme.RenderEdit()) {
+      m_theme.Apply(); m_engine.OnThemeUpdate(m_theme);
+    }
+  }
+  ImGui::End();
 }
 
 void Window::DrawLogs(char const* title) NOEXCEPT {
-  GlobalLogRender(title);
+  if (!m_logOpen) return;
+  GlobalLogRender(title, &m_logOpen);
 }
 
 void Window::RenderEngine(void) NOEXCEPT {
@@ -445,3 +489,5 @@ void Window::RenderEngine(void) NOEXCEPT {
     .elapsedTime = m_elapsedTime,
   });
 }
+
+TR_END_NAMESPACE()

@@ -7,6 +7,8 @@
 #include "helper.hpp" // NOEXCEPT
 #include "Event.hpp" // Event{}
 
+TR_BEGIN_NAMESPACE()
+
 class Camera final {
 public:
   void RenderUi(void) NOEXCEPT;
@@ -66,11 +68,13 @@ protected:
   glm::vec3 m_target = { 0.0, 0.0, -1.0 };
   glm::vec3 m_cross = { 0.0, 1.0, 0.0 };
 
-  float m_fov = 45.0f;
+  float m_fov = 50.0f;
   float m_speed = 5.0f;
   float m_sensitivity = 0.1f;
   float m_pitch = 0.0f;
   float m_yaw = -90.0f;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_CAMERA_HPP

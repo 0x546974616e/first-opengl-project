@@ -9,6 +9,8 @@
 #include "Shader.hpp" // Shader{}
 #include "helper.hpp" // NOEXCEPT
 
+TR_BEGIN_NAMESPACE()
+
 class Cube final {
 public:
   Cube(void) noexcept;
@@ -30,5 +32,7 @@ private:
 
   Shader m_shader;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_CUBE_HPP

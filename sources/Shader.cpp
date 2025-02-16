@@ -9,6 +9,8 @@
 #include "Shader.hpp" // Self{}
 #include "Log.hpp" // TR_ERROR()
 
+TR_BEGIN_NAMESPACE()
+
 static char const* ShaderType(GLenum type) NOEXCEPT {
   switch (type) {
     case GL_COMPUTE_SHADER:
@@ -89,3 +91,5 @@ void Shader::Link(void) NOEXCEPT {
     TR_ERROR("Shader::Link Error:\n%*.*s", length, length, buffer.get());
   }
 }
+
+TR_END_NAMESPACE()

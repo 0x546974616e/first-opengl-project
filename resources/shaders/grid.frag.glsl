@@ -1,6 +1,6 @@
 #version 330 core
 
-// Taken and adapted from Blender (GOLD <3):
+// Highly inspired from Blender (GOLD <3):
 // https://github.com/blender/blender/blob/main/source/blender/draw/engines/overlay/shaders/overlay_grid_vert.glsl
 // https://github.com/blender/blender/blob/main/source/blender/draw/engines/overlay/shaders/overlay_grid_frag.glsl
 // https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
@@ -34,9 +34,8 @@ uniform vec3 tr_camera;
 uniform float tr_near, tr_far;
 uniform float tr_lineSize = 1.0; // TODO: DPI
 
-// TODO: TMP
-uniform vec4 tr_colorGrid = vec4(0.3, 0.3, 0.3, 1.0);
-uniform vec4 tr_colorGridEmphasis = vec4(0.5, 0.5, 0.5, 1.0);
+uniform vec4 tr_colorGrid;
+uniform vec4 tr_colorGridEmphasis;
 uniform vec4 tr_colorGridAxisX = vec4(1.0, 0.0, 0.0, 1.0);
 uniform vec4 tr_colorGridAxisY = vec4(0.0, 1.0, 0.0, 1.0);
 uniform vec4 tr_colorGridAxisZ = vec4(0.0, 0.0, 1.0, 1.0);
@@ -175,7 +174,7 @@ void main(void) {
     float scaleC = gridSteps[min(stepIndex + 2, GRID_STEPS - 1)];
 
     float blend = linearstep(scale0 + scale0, scaleA + scaleA, resolution + resolution);
-    // Subtract from 1.0 to fix blending when `scale0x == scaleAx`.
+    // Subtract from 1.0 to fix blending when `scale0 == scaleA`.
     blend = 1.0 - blend; blend = blend * blend * blend;
 
     vec2 gridPosition, fwidthGrid;

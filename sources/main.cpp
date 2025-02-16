@@ -2,9 +2,10 @@
 #include <optional> // std::optional{}
 
 #include "Window.hpp"
+#include "helper.hpp" // TR
 
 int main(void) {
-  auto window = Window::Create();
+  auto window = TR::Window::Create();
   return window && window->MainLoop()
     ? EXIT_SUCCESS : EXIT_FAILURE;
 }

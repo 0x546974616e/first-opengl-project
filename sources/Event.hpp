@@ -1,6 +1,8 @@
 #ifndef TR_EVENT_HPP
 #define TR_EVENT_HPP
 
+TR_BEGIN_NAMESPACE()
+
 struct Event {
   double currentTime = 0.0;
   double elapsedTime = 0.0;
@@ -25,5 +27,7 @@ struct KeyboardEvent: public Event {
   bool shift = false;
   bool space = false;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_EVENT_HPP

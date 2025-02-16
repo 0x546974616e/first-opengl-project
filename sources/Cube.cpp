@@ -18,6 +18,8 @@
 #define TEXTURE_UNIT1 1
 #define TEXTURE_UNIT2 2
 
+TR_BEGIN_NAMESPACE()
+
 static char const* CubeVertexShader = R"(
   #version 330 core
   layout (location = 0) in vec3 position;
@@ -144,3 +146,5 @@ void Cube::Render(Camera const& camera) NOEXCEPT {
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }
+
+TR_END_NAMESPACE()

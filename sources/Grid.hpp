@@ -5,7 +5,10 @@
 
 #include "Camera.hpp" // Camera{}
 #include "Shader.hpp" // Shader{}
+#include "Theme.hpp" // Theme{}
 #include "helper.hpp" // NOEXCEPT
+
+TR_BEGIN_NAMESPACE()
 
 class Grid final {
 private:
@@ -30,10 +33,14 @@ public:
   void Render(Camera const& camera) NOEXCEPT;
   void RenderUi(void) NOEXCEPT;
 
+  void OnThemeUpdate(Theme& theme) NOEXCEPT;
+
 private:
   GLuint m_VAO;
   Shader m_shader;
   Flags m_flags;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_GRID_HPP

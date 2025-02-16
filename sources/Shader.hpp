@@ -11,6 +11,8 @@
 #include "helper.hpp" // NOEXCEPT
 #include "Log.hpp" // TR_ERROR()
 
+TR_BEGIN_NAMESPACE()
+
 class Shader final {
 public:
   constexpr Shader() NOEXCEPT {
@@ -39,6 +41,10 @@ public:
 
   constexpr void Bind(GLint location, glm::vec3 const& value) NOEXCEPT {
     glUniform3fv(location, 1, glm::value_ptr(value));
+  }
+
+  constexpr void Bind(GLint location, glm::vec4 const& value) NOEXCEPT {
+    glUniform4fv(location, 1, glm::value_ptr(value));
   }
 
   constexpr void Bind(GLint location, glm::mat4 const& matrix) NOEXCEPT {
@@ -72,5 +78,7 @@ private:
   GLuint m_program;
   GLint m_status;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_SHADER_HPP

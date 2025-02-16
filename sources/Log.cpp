@@ -6,6 +6,8 @@
 
 #include "Log.hpp" // TR_LOG()
 
+TR_BEGIN_NAMESPACE()
+
 class Log {
 public:
   enum class Level { ERROR, WARNING, DEBUG, INFO };
@@ -18,7 +20,7 @@ public:
   void Write(Level level, const char* format, va_list args) NOEXCEPT TR_FMTLIST(3);
 
   void RenderLine(char const* start, char const* end) NOEXCEPT;
-  void Render(char const* title) NOEXCEPT;
+  void Render(char const* title, bool* open = NULL) NOEXCEPT;
 
 private:
   bool m_autoScroll = true;
@@ -29,8 +31,8 @@ private:
 
 static Log s_log;
 
-void GlobalLogRender(char const* title) NOEXCEPT {
-  s_log.Render(title);
+void GlobalLogRender(char const* title, bool* open) NOEXCEPT {
+  s_log.Render(title, open);
 }
 
 void GlobalLog(FILE* stream, char const* format, ...) NOEXCEPT {
@@ -96,8 +98,8 @@ void Log::RenderLine(char const* start, char const* end) NOEXCEPT {
 }
 
 // Everything is taked (and improved) from ImGui Demo.
-void Log::Render(char const* title) NOEXCEPT {
-  if (!ImGui::Begin(title)) {
+void Log::Render(char const* title, bool* open) NOEXCEPT {
+  if (!ImGui::Begin(title, open)) {
     ImGui::End();
     return;
   }
@@ -117,6 +119,7 @@ void Log::Render(char const* title) NOEXCEPT {
 
   ImGuiChildFlags childFlags = ImGuiChildFlags_None;;
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_HorizontalScrollbar;
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_FrameBg]);
   if (ImGui::BeginChild("Scrolling", ImVec2(0, 0), childFlags, windowFlags)) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
     // if (copy) ImGui::LogToClipboard(); ??
@@ -162,6 +165,9 @@ void Log::Render(char const* title) NOEXCEPT {
       ImGui::SetScrollHereY(1.0f);
     }
   }
+  ImGui::PopStyleColor();
   ImGui::EndChild();
   ImGui::End();
 }
+
+TR_END_NAMESPACE()

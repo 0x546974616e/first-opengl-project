@@ -8,6 +8,8 @@
 #include "Texture.hpp" // Self{}
 #include "Log.hpp" // TR_DEBUG()
 
+TR_BEGIN_NAMESPACE()
+
 Texture::Texture(std::string_view filename) NOEXCEPT {
   glGenTextures(1, &m_texture);
   glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -41,3 +43,5 @@ Texture::Texture(std::string_view filename) NOEXCEPT {
 
   stbi_image_free(data);
 }
+
+TR_END_NAMESPACE()

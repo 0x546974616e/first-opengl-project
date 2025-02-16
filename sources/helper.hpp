@@ -13,6 +13,10 @@
 
 #define UNUSED __attribute__((unused)) // [[maybe_unused]]
 
+#define TR tr
+#define TR_BEGIN_NAMESPACE() namespace TR {
+#define TR_END_NAMESPACE()   }
+
 #define TR_STRINGIFY_HELPER(X) #X
 #define TR_STRINGIFY(X) TR_STRINGIFY_HELPER(X)
 

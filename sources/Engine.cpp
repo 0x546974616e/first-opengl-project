@@ -9,6 +9,8 @@
 #include "Engine.hpp" // Engine{}
 #include "helper.hpp" // TR_ARRAYSIZE()
 
+TR_BEGIN_NAMESPACE()
+
 static glm::vec3 positions[] = {
   glm::vec3( 0.0f, 0.0f, 0.0f),
   glm::vec3( 2.0f, 5.0f, -15.0f),
@@ -69,3 +71,5 @@ void Engine::Focus(void) NOEXCEPT {
 void Engine::UnFocus(void) NOEXCEPT {
   m_camera.UnFocus();
 }
+
+TR_END_NAMESPACE()

@@ -4,6 +4,8 @@
 #include <glad/glad.h> // OpenGL Loader
 #include <string_view> // std::string_view{}
 
+TR_BEGIN_NAMESPACE()
+
 class Texture {
 public:
   Texture(std::string_view filename) noexcept;
@@ -19,5 +21,7 @@ public:
 private:
   GLuint m_texture;
 };
+
+TR_END_NAMESPACE()
 
 #endif // TR_TEXTURE_HPP

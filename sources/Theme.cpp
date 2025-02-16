@@ -5,78 +5,131 @@
 #include "helper.hpp" // TR_VALUE_OR(), NOEXCEPT
 #include "Theme.hpp" // Self{}
 
-void Theme::ApplyTheme(void) NOEXCEPT {
+TR_BEGIN_NAMESPACE()
+
+#define TR_COLOR_L(L) TR_COLOR_RGB(L, L, L)
+#define TR_COLOR_LA(L, A) TR_COLOR_RGBA(L, L, L, A)
+#define TR_COLOR_RGB(R, G, B) TR_COLOR_RGBA(R, G, B, 0xFF)
+#define TR_COLOR_RGBA(R, G, B, A) ImVec4( \
+    static_cast<float>(R) / 255.0f, \
+    static_cast<float>(G) / 255.0f, \
+    static_cast<float>(B) / 255.0f, \
+    static_cast<float>(A) / 255.0f  \
+  )
+
+Theme::Theme(void) NOEXCEPT {
+  // Elementary
+  m_colors[ColorBlack]   = TR_COLOR_L(0x00);
+  m_colors[ColorWhite]   = TR_COLOR_L(0xFF);
+  m_colors[ColorRed]     = TR_COLOR_RGB(0xFF, 0x00, 0x00);
+  m_colors[ColorGreen]   = TR_COLOR_RGB(0x00, 0xFF, 0x00);
+  m_colors[ColorBlue]    = TR_COLOR_RGB(0x00, 0x00, 0xFF);
+  m_colors[ColorCyan]    = TR_COLOR_RGB(0x00, 0xFF, 0xFF);
+  m_colors[ColorMagenta] = TR_COLOR_RGB(0xFF, 0x00, 0xFF);
+  m_colors[ColorYellow]  = TR_COLOR_RGB(0xFF, 0xFF, 0x00);
+
+  // Text
+  m_colors[ColorText]     = TR_COLOR_L(0xFF);
+  m_colors[ColorDisabled] = TR_COLOR_L(0x80);
+
+  // Background
+  m_colors[ColorWindow]       = TR_COLOR_LA(0x30, 0xF8);
+  m_colors[ColorWindowBorder] = TR_COLOR_L(0x40);
+  m_colors[ColorHollow]       = TR_COLOR_L(0x1F);
+  m_colors[ColorHollowActive] = TR_COLOR_L(0x21);
+  m_colors[ColorMenuBar]      = TR_COLOR_L(0x24);
+  m_colors[ColorPopup]        = TR_COLOR_L(0x18);
+
+  // Viewport
+  m_colors[ColorGrid]         = TR_COLOR_L(0x4E);
+  m_colors[ColorGridEmphasis] = TR_COLOR_L(0x55);
+  m_colors[ColorViewport]     = TR_COLOR_L(0x3F);
+  m_colors[ColorAxisX]        = TR_COLOR_RGB(0xF6, 0x36, 0x52);
+  m_colors[ColorAxisY]        = TR_COLOR_RGB(0x6F, 0xA5, 0x1B);
+  m_colors[ColorAxisZ]        = TR_COLOR_RGB(0x2F, 0x83, 0xE3);
+
+  // Widget
+  m_colors[ColorActive]           = TR_COLOR_RGB(0x47, 0x72, 0xB3);
+  m_colors[ColorClickable]        = TR_COLOR_L(0x28);
+  m_colors[ColorClickableActive]  = TR_COLOR_L(0x38);
+  m_colors[ColorClickableHovered] = TR_COLOR_L(0x48);
+  m_colors[ColorGrabbable]        = TR_COLOR_L(0x51);
+  m_colors[ColorGrabbableActive]  = TR_COLOR_L(0x79);
+  m_colors[ColorGrabbableHovered] = TR_COLOR_L(0x60);
+}
+
+void Theme::Apply(void) NOEXCEPT {
   ImVec4* colors = ImGui::GetStyle().Colors;
   for (size_t i = 0u; i < ImGuiCol_COUNT; ++i) {
-    colors[i] = ImVec4(1.0, 0.0, 0.0, 1.0); // TODO: TMP
+    colors[i] = ImVec4(1.0, 0.0, 0.0, 1.0); // TODO: TMP WIP
   }
 
   // Text
-  colors[ImGuiCol_Text] = m_text;
-  colors[ImGuiCol_TextDisabled] = m_disabled;
+  colors[ImGuiCol_Text]         = m_colors[ColorText];
+  colors[ImGuiCol_TextDisabled] = m_colors[ColorDisabled];
 
   // Window
-  colors[ImGuiCol_WindowBg] = m_window.normal;
-  colors[ImGuiCol_WindowBg].w = 0.95f;
-  colors[ImGuiCol_ChildBg] = m_hollow.normal;
-  colors[ImGuiCol_ResizeGrip] = m_grabbable.normal;
-  colors[ImGuiCol_ResizeGripHovered] = m_grabbable.hovered;
-  colors[ImGuiCol_ResizeGripActive] = m_grabbable.active;
+  colors[ImGuiCol_WindowBg]          = m_colors[ColorWindow];
+  colors[ImGuiCol_ChildBg]           = m_colors[ColorHollow];
+  colors[ImGuiCol_ResizeGrip]        = m_colors[ColorGrabbable];
+  colors[ImGuiCol_ResizeGripActive]  = m_colors[ColorGrabbableActive];
+  colors[ImGuiCol_ResizeGripHovered] = m_colors[ColorGrabbableHovered];
 
   // Border
-  colors[ImGuiCol_Border] = m_window.active;
-  colors[ImGuiCol_TableBorderLight] = m_window.active;
-  colors[ImGuiCol_TableBorderStrong] = m_window.active;
-  colors[ImGuiCol_BorderShadow].w = 0.0f;
+  colors[ImGuiCol_Border]            = m_colors[ColorWindowBorder];
+  colors[ImGuiCol_TableBorderLight]  = m_colors[ColorWindowBorder];
+  colors[ImGuiCol_TableBorderStrong] = m_colors[ColorWindowBorder];
+  colors[ImGuiCol_BorderShadow]      = TR_COLOR_LA(0x00, 0x00);
 
   // Dockspace
-  colors[ImGuiCol_DockingPreview] = m_active;
-  colors[ImGuiCol_NavWindowingHighlight] = m_active;
-  colors[ImGuiCol_Separator] = m_window.active;
-  colors[ImGuiCol_SeparatorHovered] = m_grabbable.hovered;
-  colors[ImGuiCol_SeparatorActive] = m_grabbable.active;
+  colors[ImGuiCol_DockingPreview]        = m_colors[ColorActive];
+  colors[ImGuiCol_NavWindowingHighlight] = m_colors[ColorActive];
+  colors[ImGuiCol_Separator]             = m_colors[ColorWindowBorder];
+  colors[ImGuiCol_SeparatorActive]       = m_colors[ColorGrabbableActive];
+  colors[ImGuiCol_SeparatorHovered]      = m_colors[ColorGrabbableHovered];
 
   // Menu
-  colors[ImGuiCol_Header] = m_hollow.normal;
-  colors[ImGuiCol_HeaderHovered] = m_hollow.active;
-  colors[ImGuiCol_HeaderActive] = m_hollow.active;
-  colors[ImGuiCol_MenuBarBg] = m_menu.normal;
-  colors[ImGuiCol_PopupBg] = m_menu.active;
+  colors[ImGuiCol_Header]        = m_colors[ColorHollow];
+  colors[ImGuiCol_HeaderHovered] = m_colors[ColorHollowActive];
+  colors[ImGuiCol_HeaderActive]  = m_colors[ColorHollowActive];
+  colors[ImGuiCol_MenuBarBg]     = m_colors[ColorMenuBar];
+  colors[ImGuiCol_PopupBg]       = m_colors[ColorPopup];
 
   // Titlebar
-  colors[ImGuiCol_TitleBg] = m_hollow.normal;
-  colors[ImGuiCol_TitleBgActive] = m_hollow.active;
-  colors[ImGuiCol_TitleBgCollapsed] = m_hollow.normal;
+  colors[ImGuiCol_TitleBg]          = m_colors[ColorHollow];
+  colors[ImGuiCol_TitleBgActive]    = m_colors[ColorHollowActive];
+  colors[ImGuiCol_TitleBgCollapsed] = m_colors[ColorHollow];
 
   // Widget
-  colors[ImGuiCol_FrameBg] = m_clickable.normal;
-  colors[ImGuiCol_FrameBgHovered] = m_clickable.hovered;
-  colors[ImGuiCol_FrameBgActive] = m_clickable.active;
-  colors[ImGuiCol_Button] = m_clickable.normal;
-  colors[ImGuiCol_ButtonHovered] = m_clickable.hovered;
-  colors[ImGuiCol_ButtonActive] = m_clickable.active;
-  colors[ImGuiCol_SliderGrab] = m_grabbable.normal;
-  colors[ImGuiCol_SliderGrabActive] = m_grabbable.active;
-  colors[ImGuiCol_CheckMark] = m_active;
-  colors[ImGuiCol_DragDropTarget] = m_active;
+  colors[ImGuiCol_FrameBg]          = m_colors[ColorClickable];
+  colors[ImGuiCol_FrameBgActive]    = m_colors[ColorClickableActive];
+  colors[ImGuiCol_FrameBgHovered]   = m_colors[ColorClickableHovered];
+  colors[ImGuiCol_Button]           = m_colors[ColorClickable];
+  colors[ImGuiCol_ButtonActive]     = m_colors[ColorClickableActive];
+  colors[ImGuiCol_ButtonHovered]    = m_colors[ColorClickableHovered];
+  colors[ImGuiCol_SliderGrab]       = m_colors[ColorGrabbable];
+  colors[ImGuiCol_SliderGrabActive] = m_colors[ColorGrabbableActive];
+  colors[ImGuiCol_CheckMark]        = m_colors[ColorActive];
+  colors[ImGuiCol_DragDropTarget]   = m_colors[ColorActive];
 
   // Tab
-  colors[ImGuiCol_Tab] = m_clickable.normal;
-  colors[ImGuiCol_TabHovered] = m_clickable.hovered;
-  colors[ImGuiCol_TabSelected] = m_clickable.active;
-  colors[ImGuiCol_TabSelectedOverline] = m_active;
-  colors[ImGuiCol_TabDimmed] = m_hollow.normal;
-  colors[ImGuiCol_TabDimmedSelected] = m_clickable.active;
-  colors[ImGuiCol_TabDimmedSelectedOverline] = m_active;
+  colors[ImGuiCol_Tab]                       = m_colors[ColorClickable];
+  colors[ImGuiCol_TabSelected]               = m_colors[ColorClickableActive];
+  colors[ImGuiCol_TabHovered]                = m_colors[ColorClickableHovered];
+  colors[ImGuiCol_TabSelectedOverline]       = m_colors[ColorClickableActive];
+  colors[ImGuiCol_TabDimmed]                 = m_colors[ColorHollow];
+  colors[ImGuiCol_TabDimmedSelected]         = m_colors[ColorClickableActive];
+  colors[ImGuiCol_TabDimmedSelectedOverline] = m_colors[ColorClickableActive];
 
   // Scrollbar
-  colors[ImGuiCol_ScrollbarBg] = m_clickable.normal;
-  colors[ImGuiCol_ScrollbarGrab] = m_grabbable.normal;
-  colors[ImGuiCol_ScrollbarGrabHovered] = m_grabbable.hovered;
-  colors[ImGuiCol_ScrollbarGrabActive] = m_grabbable.active;
+  colors[ImGuiCol_ScrollbarBg]          = m_colors[ColorClickable];
+  colors[ImGuiCol_ScrollbarGrab]        = m_colors[ColorGrabbable];
+  colors[ImGuiCol_ScrollbarGrabActive]  = m_colors[ColorGrabbableActive];
+  colors[ImGuiCol_ScrollbarGrabHovered] = m_colors[ColorGrabbableHovered];
 
   // OpenGL
-  glClearColor(m_viewport.x, m_viewport.y, m_viewport.z, 1.0f);
+  ImVec4& viewport = m_colors[ColorViewport];
+  glClearColor(viewport.x, viewport.y, viewport.z, 1.0f);
 
   ImGuiStyle& style = ImGui::GetStyle();
   style.WindowPadding                     = ImVec2(8.00f, 8.00f);
@@ -93,7 +146,7 @@ void Theme::ApplyTheme(void) NOEXCEPT {
   style.GrabMinSize   = 14;
   style.ScrollbarSize = 18;
 
-  static float border = 1.0f;
+  static float border = 2.0f;
   style.WindowBorderSize = border;
   style.ChildBorderSize = border;
   style.PopupBorderSize = border;
@@ -116,153 +169,57 @@ void Theme::ApplyTheme(void) NOEXCEPT {
   style.ColorButtonPosition = ImGuiDir_Left;
 }
 
-static bool BigColorEdit(char const* id, ImVec4& color, ImVec2 dimensions) NOEXCEPT {
-  ImGui::PushID(id);
+bool Theme::RenderEdit(void) NOEXCEPT {
+  bool update = false;
 
-  bool changed = false;
-  static ImVec4 backupColor;
+  #define TR_SECTION(LABEL, ...) do {             \
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once); \
+    if (ImGui::TreeNode(LABEL)) {                 \
+      __VA_ARGS__; /* EVIL */                     \
+      ImGui::TreePop();                           \
+    }                                             \
+  } while (0)
 
-  if (ImGui::ColorButton(id, color, ImGuiColorEditFlags_None, dimensions)) {
-    ImGui::OpenPopup("##Popup");
-    backupColor = color;
-  }
+  #define TR_EDIT3(LABEL, COLOR) TR_EDIT(3, LABEL, COLOR)
+  #define TR_EDIT4(LABEL, COLOR) TR_EDIT(4, LABEL, COLOR)
+  #define TR_EDIT(COMPONENTS, LABEL, COLOR) do {                         \
+    update |= ImGui::LargeColorEdit##COMPONENTS(LABEL, m_colors[COLOR]); \
+  } while (0)
 
-  if (ImGui::BeginDragDropTarget()) {
-    if (ImGuiPayload const* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F)) {
-      memcpy(&color.x, payload->Data, 3*sizeof(float));
-      changed = true;
-    }
+  TR_SECTION("Text",
+    TR_EDIT3("Font", ColorText);
+    TR_EDIT3("Disabled", ColorDisabled);
+  );
 
-    if (ImGuiPayload const* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F)) {
-      memcpy(&color.x, payload->Data, 4*sizeof(float));
-      changed = true;
-    }
+  TR_SECTION("Background",
+    TR_EDIT4("Window", ColorWindow);
+    TR_EDIT4("Border", ColorWindowBorder);
+    TR_EDIT4("Hollow", ColorHollow);
+    TR_EDIT4("Active Hollow", ColorHollowActive);
+    TR_EDIT3("Menu Bar", ColorMenuBar);
+    TR_EDIT4("Popup", ColorPopup);
+  );
 
-    ImGui::EndDragDropTarget();
-  }
+  TR_SECTION("Render",
+    TR_EDIT3("Grid", ColorGrid);
+    TR_EDIT3("Emphasis Line ", ColorGridEmphasis);
+    TR_EDIT3("Viewport", ColorViewport);
+    TR_EDIT3("X Axis", ColorAxisX);
+    TR_EDIT3("Y Axis", ColorAxisY);
+    TR_EDIT3("Z Axis", ColorAxisZ);
+  );
 
-  if (ImGui::BeginPopup("##Popup")) {
-    ImGuiColorEditFlags picker = ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview;
-    ImGuiColorEditFlags button = ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf;
+  TR_SECTION("Widget",
+    TR_EDIT3("Active", ColorActive);
+    TR_EDIT3("Clickable", ColorClickable);
+    TR_EDIT3("Active Clickable", ColorClickableActive);
+    TR_EDIT3("Hovered Clickable", ColorClickableHovered);
+    TR_EDIT3("Grabbable", ColorGrabbable);
+    TR_EDIT3("Active Grabbable", ColorGrabbableActive);
+    TR_EDIT3("Hovered Grabbable", ColorGrabbableHovered);
+  );
 
-    // Unfortunately __attribute__(format(printf, 1, 0)) does not allow the id
-    // to be passed directly to ImGui::Text().
-    ImGui::Text("%s", id);
-
-    if (ImGui::ColorPicker3("##Picker", &color.x, picker)) {
-      changed = true;
-    }
-
-    ImGui::SameLine();
-    ImGui::BeginGroup();
-
-    ImGui::Text("Current");
-    ImVec2 size = ImVec2(60, 40);
-    ImGui::ColorButton("##Current", color, button, size);
-
-    ImGui::Text("Previous");
-    if (ImGui::ColorButton("##Previous", backupColor, button, size)) {
-      color = backupColor;
-      changed = true;
-    }
-
-    ImGui::EndGroup();
-    ImGui::EndPopup();
-  }
-
-  ImGui::PopID();
-  return changed;
+  return update;
 }
 
-void Theme::EditTheme(char const* name) NOEXCEPT {
-  if (ImGui::Begin(TR_VALUE_OR(name, "Theme"))) {
-    #define TR_CELL_WIDTH  50
-    #define TR_CELL_HEIGHT 30
-    #define TR_CELL_DIMENSIONS ImVec2(TR_CELL_WIDTH, TR_CELL_HEIGHT)
-
-    bool update = false;
-    #define TR_COLOR_EDIT(ID, COLOR) do {                    \
-      update |= BigColorEdit(ID, COLOR, TR_CELL_DIMENSIONS); \
-    } while (0)
-
-    #define TR_HALIGN(TEXT, WIDTH) do {                           \
-      float x = ImGui::GetCursorPosX();                           \
-      float offset = ((WIDTH) - ImGui::CalcTextSize(TEXT).x) / 2; \
-      ImGui::SetCursorPosX(x + offset); ImGui::Text(TEXT);        \
-      ImGui::SetCursorPosX(x);                                    \
-    } while (0)
-
-    #define TR_VALIGN(TEXT, HEIGHT) do {                           \
-      float y = ImGui::GetCursorPosY();                            \
-      float offset = ((HEIGHT) - ImGui::CalcTextSize(TEXT).y) / 2; \
-      ImGui::SetCursorPosY(y + offset); ImGui::Text(TEXT);         \
-      ImGui::SetCursorPosY(y);                                     \
-    } while (0)
-
-    #define TR_WIDGET_EDIT(NAME, COLOR) do {                                       \
-      ImGui::TableNextRow();                                                       \
-      ImGui::TableNextColumn(); TR_VALIGN(NAME, TR_CELL_HEIGHT);                   \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Normal" , (COLOR).normal);  \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Active" , (COLOR).active);  \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Hovered", (COLOR).hovered); \
-    } while (0)
-
-    #define TR_FRAME_EDIT(NAME, COLOR) do {                                      \
-      ImGui::TableNextRow();                                                     \
-      ImGui::TableNextColumn(); TR_VALIGN(NAME, TR_CELL_HEIGHT);                 \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Normal", (COLOR).normal); \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Active", (COLOR).active); \
-      ImGui::TableNextColumn();                                                  \
-    } while (0)
-
-    #define TR_SINGLE_EDIT(NAME, COLOR) do {                              \
-      ImGui::TableNextRow();                                              \
-      ImGui::TableNextColumn(); TR_VALIGN(NAME, TR_CELL_HEIGHT);          \
-      ImGui::TableNextColumn(); TR_COLOR_EDIT(NAME " - Normal", (COLOR)); \
-      ImGui::TableNextColumn();                                           \
-      ImGui::TableNextColumn();                                           \
-    } while (0)
-
-    // | ImGuiTableFlags_BordersInner;
-    float cellX = ImGui::GetStyle().CellPadding.x;
-    ImGuiTabBarFlags flags = ImGuiTableFlags_SizingFixedSame;
-    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(cellX, 2.0f));
-    if (ImGui::BeginTable("Theme", 4, flags)) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn(); TR_HALIGN("Normal" , TR_CELL_WIDTH);
-      ImGui::TableNextColumn(); TR_HALIGN("Active" , TR_CELL_WIDTH);
-      ImGui::TableNextColumn(); TR_HALIGN("Hovered", TR_CELL_WIDTH);
-
-      TR_SINGLE_EDIT("Text", m_text);
-      TR_SINGLE_EDIT("Disabled", m_disabled);
-      TR_SINGLE_EDIT("Active", m_active);
-      TR_SINGLE_EDIT("Viewport", m_viewport);
-      TR_FRAME_EDIT("Window", m_window);
-      TR_FRAME_EDIT("Hollow", m_hollow);
-      TR_WIDGET_EDIT("Clickable", m_clickable);
-      TR_WIDGET_EDIT("Grabbable", m_grabbable);
-      TR_FRAME_EDIT("Menu", m_menu);
-      ImGui::EndTable();
-    }
-    ImGui::PopStyleVar();
-
-    ImGui::Checkbox("Show Style Editor", &m_showStyleEditor);
-
-    if (update) {
-      ApplyTheme();
-    }
-  }
-  ImGui::End();
-
-  if (m_showStyleEditor) {
-    // Viewport can never be NULL.
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::SetNextWindowSize(Min(viewport->Size * 0.8f, ImVec2(500, 800)), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-    ImGui::Begin("Style Editor", &m_showStyleEditor);
-    ImGui::ShowStyleEditor();
-    ImGui::End();
-  }
-}
+TR_END_NAMESPACE()
