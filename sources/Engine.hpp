@@ -11,6 +11,7 @@
 class Engine final {
 public:
   void Render(Event event) NOEXCEPT;
+  void RenderUi(void) NOEXCEPT;
 
   void ProcessMouse(MouseEvent event) NOEXCEPT;
   void ProcessScroll(ScrollEvent event) NOEXCEPT;

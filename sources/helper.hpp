@@ -49,26 +49,4 @@
 #define TR_MAX(A, B) (((A) > (B)) ? (A) : (B))
 #define TR_CLAMP(X, A, B) TR_MAX(A, TR_MIN(B, X))
 
-#ifdef IMGUI_VERSION
-  static constexpr ImVec2 operator*(ImVec2 const& vector, float scalar) NOEXCEPT {
-    return ImVec2(vector.x * scalar, vector.y * scalar);
-  }
-
-  static constexpr ImVec2 operator+(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(a.x + b.x, a.y + b.y);
-  }
-
-  static constexpr ImVec2 operator-(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(a.x - b.x, a.y - b.y);
-  }
-
-  static constexpr ImVec2 Min(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(TR_MIN(a.x, b.x), TR_MIN(a.y, b.y));
-  }
-
-  static constexpr ImVec2 Max(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(TR_MAX(a.x, b.x), TR_MAX(a.y, b.y));
-  }
-#endif
-
 #endif // TR_HELPER_HPP

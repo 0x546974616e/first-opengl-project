@@ -43,7 +43,7 @@ static char const* CubeFragmentShader = R"(
   uniform sampler2D texture1;
   uniform sampler2D texture2;
   void main() {
-    tr_Fragment = mix(
+    vec4 color = mix(
       mix(
         texture(texture1, tr_Texture),
         texture(texture2, tr_Texture),
@@ -52,6 +52,7 @@ static char const* CubeFragmentShader = R"(
       vec4(tr_Color, 1.0f),
       0.2f
     );
+    tr_Fragment = vec4(color.xyz, 1.0f);
   }
 )";
 

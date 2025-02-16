@@ -6,7 +6,6 @@
 #include <glm/mat4x4.hpp> // glm::mat4{}
 #include <glm/gtc/type_ptr.hpp> // glm::value_ptr()
 
-#include <cstdio> // fprintf(), stderr
 #include <string_view> // std::string_view{}
 
 #include "helper.hpp" // NOEXCEPT
@@ -28,6 +27,10 @@ public:
 
   constexpr void Bind(GLint location, GLint value) NOEXCEPT {
     glUniform1i(location, value);
+  }
+
+  constexpr void Bind(GLint location, GLuint value) NOEXCEPT {
+    glUniform1ui(location, value);
   }
 
   constexpr void Bind(GLint location, GLfloat value) NOEXCEPT {

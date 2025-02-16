@@ -9,6 +9,8 @@
 
 class Camera final {
 public:
+  void RenderUi(void) NOEXCEPT;
+
   void ProcessMouse(MouseEvent event) NOEXCEPT;
   void ProcessScroll(ScrollEvent event) NOEXCEPT;
   void ProcessKeyboard(KeyboardEvent event) NOEXCEPT;
@@ -20,12 +22,9 @@ public:
     m_width = width; m_height = height;
   }
 
+public:
   constexpr float AspectRatio(void) const NOEXCEPT {
     return static_cast<float>(m_width) / static_cast<float>(m_height);
-  }
-
-  constexpr glm::vec3 Position(void) const NOEXCEPT {
-    return m_position;
   }
 
   constexpr glm::mat4 LookAt(void) const NOEXCEPT {
@@ -38,16 +37,27 @@ public:
 
   constexpr glm::mat4 Projection(void) const NOEXCEPT {
     return glm::perspective(
-      glm::radians(static_cast<float>(m_fov)),
+      glm::radians(m_fov),
       AspectRatio(),
-      0.1f, // Near
-      100.0f // Far
+      m_near, m_far
     );
   }
+
+public:
+  constexpr glm::vec3 Position(void) const NOEXCEPT { return m_position; }
+
+  constexpr int Width(void) const NOEXCEPT { return m_width; }
+  constexpr int Height(void) const NOEXCEPT { return m_height; }
+
+  constexpr float Near(void) const NOEXCEPT { return m_near; }
+  constexpr float Far(void) const NOEXCEPT { return m_far; }
 
 protected:
   int m_width = 0;
   int m_height = 0;
+
+  float m_near = 0.1f;
+  float m_far = 100.0f;
 
   bool m_firstMouse = true;
   MouseEvent m_lastMouse;
@@ -56,10 +66,11 @@ protected:
   glm::vec3 m_target = { 0.0, 0.0, -1.0 };
   glm::vec3 m_cross = { 0.0, 1.0, 0.0 };
 
-  double m_fov = 45.0;
-  double m_sensitivity = 0.1;
-  double m_pitch = 0.0;
-  double m_yaw = -90.0;
+  float m_fov = 45.0f;
+  float m_speed = 5.0f;
+  float m_sensitivity = 0.1f;
+  float m_pitch = 0.0f;
+  float m_yaw = -90.0f;
 };
 
 #endif // TR_CAMERA_HPP

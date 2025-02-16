@@ -35,9 +35,14 @@ void GlobalLogRender(char const* title) NOEXCEPT {
 
 void GlobalLog(FILE* stream, char const* format, ...) NOEXCEPT {
   va_list args;
+
   va_start(args, format);
-  fprintf(stream, format, args);
+  vfprintf(stream, format, args);
+  va_end(args);
+
   Log::Level level = stream == stderr ? Log::Level::ERROR : Log::Level::INFO;
+
+  va_start(args, format);
   s_log.Write(level, format, args);
   va_end(args);
 }

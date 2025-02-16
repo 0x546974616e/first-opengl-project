@@ -1,4 +1,5 @@
 #include "imgui/imgui.h" // ImVec4{}
+#include "ImGuiCustom.hpp" // operator+()
 #include <glad/glad.h> // glClearColor()
 
 #include "helper.hpp" // TR_VALUE_OR(), NOEXCEPT
@@ -85,7 +86,7 @@ void Theme::ApplyTheme(void) NOEXCEPT {
   style.ItemInnerSpacing                  = ImVec2(6.00f, 6.00f);
   style.TouchExtraPadding                 = ImVec2(0.00f, 0.00f);
 
-  style.IndentSpacing = 30;
+  style.IndentSpacing = 8;
   style.LogSliderDeadzone = 4;
   style.SeparatorTextBorderSize = 2; // 1
 
@@ -180,10 +181,8 @@ void Theme::EditTheme(char const* name) NOEXCEPT {
     #define TR_CELL_DIMENSIONS ImVec2(TR_CELL_WIDTH, TR_CELL_HEIGHT)
 
     bool update = false;
-    #define TR_COLOR_EDIT(ID, COLOR) do {                \
-      if (BigColorEdit(ID, COLOR, TR_CELL_DIMENSIONS)) { \
-        update = true;                                   \
-      }                                                  \
+    #define TR_COLOR_EDIT(ID, COLOR) do {                    \
+      update |= BigColorEdit(ID, COLOR, TR_CELL_DIMENSIONS); \
     } while (0)
 
     #define TR_HALIGN(TEXT, WIDTH) do {                           \

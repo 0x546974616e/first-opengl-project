@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h> // GLFW Library
 #include "imgui/imgui.h" // ImGuiID
 
-#include <cstdio> // fprintf(), stderr
 #include <optional> // std::optional{}
 #include <utility> // std::in_place
 
@@ -36,6 +35,7 @@ public:
   void RenderEngine(void) NOEXCEPT;
 
 private:
+  void DrawMenuBar(void) NOEXCEPT;
   void DrawScene(char const* title) NOEXCEPT;
   void DrawInspector(char const* title) NOEXCEPT;
   void DrawProperties(char const* title) NOEXCEPT;

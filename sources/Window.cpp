@@ -2,6 +2,7 @@
 #include "imgui/imgui_internal.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "ImGuiCustom.hpp" // operator+(ImVec2)
 
 #include <glad/glad.h> // OpenGL Loader
 #include <GLFW/glfw3.h> // GLFW Library
@@ -107,6 +108,9 @@ std::optional<Window> Window::Create(void) NOEXCEPT {
   }
 
   TR_DEBUG("GLAD initialised.");
+  glEnable(GL_BLEND);
+  // FinalColor = FragColor.rgb * FragColor.a + FrameBuffer.rgb * (1 - FragColor.a)
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
   TR_DEBUG(
     "OpenGL Version %d.%d"
@@ -124,6 +128,10 @@ Window::Window(GLFWwindow* window) NOEXCEPT
   glfwSetKeyCallback(window, KeyboardCallback);
   glfwSetCursorPosCallback(window, MouseCallback);
   glfwSetScrollCallback(window, ScrollCallback);
+
+  float xscale = 0.5, yscale = 0; // TODO: TMP
+  glfwGetWindowContentScale(window, &xscale, &yscale);
+  TR_DEBUG("Window Scaling Factor: %.1f, %.1f", xscale, yscale);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -193,7 +201,7 @@ void Window::ToggleNavigationMode(bool enter) NOEXCEPT {
   if (enter && !m_navigationMode) {
     ImGui::SetWindowFocus(NULL);
     ImGuiIO io = ImGui::GetIO();
-    // TODO: What about the mice for ImGui?
+    // TODO: What about the mice for ImGui? (io.WantCaptureMouse)
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
     glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -287,7 +295,7 @@ void Window::RenderUi(void) NOEXCEPT {
       ImGuiID leftId, sceneId, logId, topId, bottomId;
       ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.2f, &leftId, &mainId); // L|M
       ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.225f, &logId, &sceneId); // S\l
-      ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Up, 0.5f, &topId, &bottomId); // T\B
+      ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Up, 0.7f, &topId, &bottomId); // T\B
       ImGui::DockBuilderDockWindow(s_sceneTitle, sceneId);
       ImGui::DockBuilderDockWindow(s_logTitle, logId);
       ImGui::DockBuilderDockWindow(s_themeTitle, topId);
@@ -303,18 +311,7 @@ void Window::RenderUi(void) NOEXCEPT {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
   ImGui::Begin("#Window", NULL, windowFlags);
   ImGui::PopStyleVar(3);
-
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("Create")) { }
-      if (ImGui::MenuItem("Open", "Ctrl+O")) { }
-      if (ImGui::MenuItem("Save", "Ctrl+S")) { TR_DEBUG("dada"); }
-      if (ImGui::MenuItem("Save as..")) { }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMenuBar();
-  }
-
+  DrawMenuBar();
   ImGui::DockSpace(m_dockSpaceId, ImVec2(0.0f, 0.0f), dockSpaceFlags);
   ImGui::End();
 
@@ -323,6 +320,21 @@ void Window::RenderUi(void) NOEXCEPT {
   DrawProperties(s_propertiesTitle);
   DrawTheme(s_themeTitle);
   DrawLogs(s_logTitle);
+}
+
+void Window::DrawMenuBar(void) NOEXCEPT {
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      if (ImGui::MenuItem("Test Debug", "Ctrl+O")) { TR_DEBUG("Test Debug Message"); }
+      if (ImGui::MenuItem("Test Error", "Ctrl+S")) { TR_ERROR("Test Error Message"); }
+      ImGui::Separator();
+      if (ImGui::MenuItem("Exit", "Escape")) {
+        glfwSetWindowShouldClose(m_window, true);
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
 }
 
 void Window::DrawScene(char const* title) NOEXCEPT {
@@ -340,8 +352,13 @@ void Window::DrawScene(char const* title) NOEXCEPT {
   ImGui::SetNextWindowBgAlpha(0);
 
   if (ImGui::Begin(title, NULL, ImGuiWindowFlags_NoBackground)) {
-    if (ImGui::IsWindowFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-      if (!m_navigationMode) ToggleNavigationMode(true);
+    if (m_navigationMode) {
+      if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+        ToggleNavigationMode(false);
+      }
+    }
+    else if (ImGui::IsWindowFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+      ToggleNavigationMode(true);
     }
 
     ImGuiWindowFlags hintFlags = (0
@@ -374,7 +391,7 @@ void Window::DrawScene(char const* title) NOEXCEPT {
 void Window::DrawInspector(char const* title) NOEXCEPT {
   static bool showDemoWindow = false;
   if (showDemoWindow) {
-    ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow(&showDemoWindow);
   }
 
   if (ImGui::Begin(title)) {
@@ -391,8 +408,7 @@ void Window::DrawInspector(char const* title) NOEXCEPT {
 
 void Window::DrawProperties(char const* title) NOEXCEPT {
   if (ImGui::Begin(title)) {
-    ImGui::Text("Properties");
-    ImGui::Text("Camera, Cube, ...");
+    m_engine.RenderUi();
   }
   ImGui::End();
 }

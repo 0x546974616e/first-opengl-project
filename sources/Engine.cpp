@@ -1,3 +1,5 @@
+#include "imgui/imgui.h"
+
 #include <glad/glad.h> // OpenGL Loader
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp> // glm::mat4{}
@@ -21,7 +23,6 @@ static glm::vec3 positions[] = {
 };
 
 void Engine::Render(Event event) NOEXCEPT {
-  m_grid.Render(m_camera);
   for (size_t i = 0u; i < TR_ARRAYSIZE(positions); ++i) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, positions[i]);
@@ -29,6 +30,23 @@ void Engine::Render(Event event) NOEXCEPT {
     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
     m_cube.Transform(model);
     m_cube.Render(m_camera);
+  }
+  m_grid.Render(m_camera);
+}
+
+void Engine::RenderUi(void) NOEXCEPT {
+  ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+
+  ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+  if (ImGui::TreeNode("Camera")) {
+    m_camera.RenderUi();
+    ImGui::TreePop();
+  }
+
+  ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+  if (ImGui::TreeNode("Grid")) {
+    m_grid.RenderUi();
+    ImGui::TreePop();
   }
 }
 

@@ -1,3 +1,7 @@
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "ImGuiCustom.hpp"
+
 #include <glad/glad.h> // OpenGL API
 
 #include "Grid.hpp" // Grid{}
@@ -5,59 +9,50 @@
 #include "Shader.hpp" // Shader{}
 #include "helper.hpp" // NOEXCEPT
 
-static char const* GridVertexShader = R"(
-  #version 330 core
+Grid::Grid(void) NOEXCEPT: m_VAO(0u), m_flags(GRID_NONE) {
+  m_flags = static_cast<Flags>(SHOW_GRID | GRID_AXIS_X | GRID_AXIS_Z | GRID_PLANE_XZ);
 
-  out vec2 uv;
-
-  uniform mat4 view;
-  uniform mat4 projection;
-  uniform vec3 cameraPosition;
-
-  const vec3 positions[4] = vec3[4](
-    vec3(-1.0, 0.0, -1.0), // Bottom Left
-    vec3(+1.0, 0.0, -1.0), // Bottom Right
-    vec3(+1.0, 0.0, +1.0), // Top Right
-    vec3(-1.0, 0.0, +1.0)  // Top Left
-  );
-
-  const int indices[6] = int[6](0, 2, 1, 2, 0, 3);
-
-  void main() {
-    int index = indices[gl_VertexID];
-    uv = vec2(positions[index].xz);
-    vec3 position = positions[index] * 10.0;
-    position.x += cameraPosition.x * 0.00000001;
-    position.z += cameraPosition.z * 0.00000001;
-    gl_Position = projection * view * vec4(position, 1.0);
-  }
-)";
-
-static char const* GridFragmentShader = R"(
-  #version 330 core
-  in vec2 uv;
-
-  layout (location = 0) out vec4 tr_Fragment;
-  void main() {
-    vec2 dada = vec2(uv * 2);
-    tr_Fragment = vec4(dada, 0.0, 0.2);
-  }
-)";
-
-Grid::Grid(void) NOEXCEPT: m_VAO(0u) {
   glGenVertexArrays(1, &m_VAO);
-  m_shader.Attach(GL_VERTEX_SHADER, GridVertexShader);
-  m_shader.Attach(GL_FRAGMENT_SHADER, GridFragmentShader);
+
+  m_shader.Attach("grid.vert.glsl");
+  m_shader.Attach("grid.frag.glsl");
   m_shader.Link();
+
   TR_DEBUG("Grid created.");
 }
 
+void Grid::RenderUi(void) NOEXCEPT {
+  ImU64 show = m_flags & SHOW_GRID;
+  ImU64 axis = m_flags & GRID_AXIS_MASK;
+  ImU64 plane = m_flags & GRID_PLANE_MASK;
+
+  static char const* axisLabels[3] = { "X", "Y", "Z" };
+  static char const* planeLabels[3] = { "XY", "YZ", "XZ" };
+
+  static ImU64 axisFlags[3] = { GRID_AXIS_X, GRID_AXIS_Y, GRID_AXIS_Z };
+  static ImU64 planeFlags[3] = { GRID_PLANE_XY, GRID_PLANE_YZ, GRID_PLANE_XZ };
+
+  ImGui::CheckboxFlags("Show Grid", &show, SHOW_GRID);
+  ImGui::ButtonFlagsGroup("Axis", &axis, axisFlags, axisLabels, 3);
+  ImGui::ButtonFlagsGroup("Plane", &plane, planeFlags, planeLabels, 3, ImGuiButtonFlagsGroup_Exclusive);
+
+  m_flags = static_cast<Flags>(show | axis | plane);
+}
+
+// TODO: Render the othogonal axis to the current plane when requested.
 void Grid::Render(Camera const& camera) NOEXCEPT {
+  if ((m_flags & (GRID_AXIS_MASK | GRID_PLANE_MASK)) == GRID_NONE) return;
+
   m_shader.Use();
   glBindVertexArray(m_VAO);
-  m_shader.Bind("view", camera.LookAt());
-  m_shader.Bind("projection", camera.Projection());
-  m_shader.Bind("cameraPosition", camera.Position());
+
+  m_shader.Bind("tr_view", camera.LookAt());
+  m_shader.Bind("tr_projection", camera.Projection());
+  m_shader.Bind("tr_camera", camera.Position());
+  m_shader.Bind("tr_near", camera.Near());
+  m_shader.Bind("tr_far", camera.Far());
+  m_shader.Bind("tr_flags", m_flags);
+
   // Attribute-less rendering.
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
