@@ -33,10 +33,10 @@ Theme::Theme(void) NOEXCEPT {
   m_colors[ColorDisabled] = TR_COLOR_L(0x80);
 
   // Background
-  m_colors[ColorWindow]       = TR_COLOR_LA(0x30, 0xF8);
+  m_colors[ColorWindow]       = TR_COLOR_LA(0x30, 0xF4);
   m_colors[ColorWindowBorder] = TR_COLOR_L(0x40);
-  m_colors[ColorHollow]       = TR_COLOR_L(0x1F);
-  m_colors[ColorHollowActive] = TR_COLOR_L(0x21);
+  m_colors[ColorHollow]       = TR_COLOR_L(0x20);
+  m_colors[ColorHollowActive] = TR_COLOR_L(0x22);
   m_colors[ColorMenuBar]      = TR_COLOR_L(0x24);
   m_colors[ColorPopup]        = TR_COLOR_L(0x18);
 
@@ -109,8 +109,10 @@ void Theme::Apply(void) NOEXCEPT {
   colors[ImGuiCol_ButtonHovered]    = m_colors[ColorClickableHovered];
   colors[ImGuiCol_SliderGrab]       = m_colors[ColorGrabbable];
   colors[ImGuiCol_SliderGrabActive] = m_colors[ColorGrabbableActive];
-  colors[ImGuiCol_CheckMark]        = m_colors[ColorActive];
-  colors[ImGuiCol_DragDropTarget]   = m_colors[ColorActive];
+
+  colors[ImGuiCol_CheckMark]      = m_colors[ColorActive];
+  colors[ImGuiCol_DragDropTarget] = m_colors[ColorActive];
+  colors[ImGuiCol_NavCursor]      = m_colors[ColorActive];
 
   // Tab
   colors[ImGuiCol_Tab]                       = m_colors[ColorClickable];

@@ -39,6 +39,7 @@ private:
   GLuint m_VAO;
   Shader m_shader;
   Flags m_flags;
+  GLfloat m_lineSize;
 };
 
 TR_END_NAMESPACE()

@@ -12,7 +12,9 @@
 
 TR_BEGIN_NAMESPACE()
 
-Grid::Grid(void) NOEXCEPT: m_VAO(0u), m_flags(GRID_NONE) {
+Grid::Grid(void) NOEXCEPT
+  : m_VAO(0u), m_flags(GRID_NONE), m_lineSize(0.2f)
+{
   m_flags = static_cast<Flags>(SHOW_GRID | GRID_AXIS_X | GRID_AXIS_Z | GRID_PLANE_XZ);
 
   glGenVertexArrays(1, &m_VAO);
@@ -25,6 +27,7 @@ Grid::Grid(void) NOEXCEPT: m_VAO(0u), m_flags(GRID_NONE) {
 }
 
 void Grid::RenderUi(void) NOEXCEPT {
+
   ImU64 show = m_flags & SHOW_GRID;
   ImU64 axis = m_flags & GRID_AXIS_MASK;
   ImU64 plane = m_flags & GRID_PLANE_MASK;
@@ -35,8 +38,9 @@ void Grid::RenderUi(void) NOEXCEPT {
   static ImU64 axisFlags[3] = { GRID_AXIS_X, GRID_AXIS_Y, GRID_AXIS_Z };
   static ImU64 planeFlags[3] = { GRID_PLANE_XY, GRID_PLANE_YZ, GRID_PLANE_XZ };
 
+  ImGui::DragFloat("Line Size", &m_lineSize, 0.01f, 0.01f, 2.0f, "%.1f");
   ImGui::ButtonFlagsGroup("Axis", &axis, axisFlags, axisLabels, 3);
-  ImGui::ButtonFlagsGroup("Plane", &plane, planeFlags, planeLabels, 3, ImGuiButtonFlagsGroup_Exclusive);
+  ImGui::ButtonFlagsGroup("Floor", &plane, planeFlags, planeLabels, 3, ImGuiButtonFlagsGroup_Exclusive);
   ImGui::CheckboxFlags("Show Grid", &show, SHOW_GRID);
 
   m_flags = static_cast<Flags>(show | axis | plane);
@@ -60,7 +64,7 @@ void Grid::OnThemeUpdate(Theme& theme) NOEXCEPT {
   m_shader.Bind("tr_colorGridAxisZ", glm::make_vec4(&colorAxisZ.x));
 }
 
-// TODO: Render the othogonal axis to the current plane when requested.
+// TODO: Render the othogonal axis to the current plane when requested (glDepthFunc(GL_ALWAYS)?)
 void Grid::Render(Camera const& camera) NOEXCEPT {
   if ((m_flags & (GRID_AXIS_MASK | GRID_PLANE_MASK)) == GRID_NONE) return;
 
@@ -73,6 +77,7 @@ void Grid::Render(Camera const& camera) NOEXCEPT {
   m_shader.Bind("tr_near", camera.Near());
   m_shader.Bind("tr_far", camera.Far());
   m_shader.Bind("tr_flags", m_flags);
+  m_shader.Bind("tr_lineSize", m_lineSize);
 
   // Attribute-less rendering.
   glDrawArrays(GL_TRIANGLES, 0, 6);

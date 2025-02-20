@@ -205,8 +205,9 @@ void main(void) {
     tr_fragment = vec4(tr_colorGrid.rgb, 0.0);
   }
 
-  // TODO: Artefacts appear when axes are far.
+  // TODO: Artefacts appear when axes are far (fading fixes that).
   if (testFlag(tr_flags, GRID_AXIS_MASK)) {
+    // TODO: Axes are reversed.
     vec3 axes = getAxes(tr_position, fwidthPosition, 0.1);
 
     if (testFlag(tr_flags, GRID_AXIS_X)) {

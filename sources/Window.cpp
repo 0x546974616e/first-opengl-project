@@ -300,7 +300,7 @@ void Window::RenderUi(void) NOEXCEPT {
     #else
       ImGuiID mainId = m_dockSpaceId;
       ImGuiID leftId, sceneId, logId, topId, bottomId;
-      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.2f, &leftId, &mainId); // L|M
+      ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Left, 0.175f, &leftId, &mainId); // L|M
       ImGui::DockBuilderSplitNode(mainId, ImGuiDir_Down, 0.225f, &logId, &sceneId); // S\l
       ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Up, 0.7f, &topId, &bottomId); // T\B
       ImGui::DockBuilderDockWindow(s_sceneTitle, sceneId);
