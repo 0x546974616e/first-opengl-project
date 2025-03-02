@@ -6,6 +6,8 @@
 #include <glm/mat4x4.hpp> // glm::mat4{}
 #include <glm/gtc/type_ptr.hpp> // glm::value_ptr()
 
+#include <span> // std::span{}
+#include <memory> // std::unique_ptr{}
 #include <string_view> // std::string_view{}
 
 #include "helper.hpp" // NOEXCEPT
@@ -60,13 +62,32 @@ public:
     else Bind(location, std::forward<Value>(value));
   }
 
+  // TODO: template <class T, size_t N> ...(T (&value)[N])
+
   constexpr GLuint Get() const NOEXCEPT {
     return m_program;
   }
 
   /// Load from "resources/shaders/".
   void Attach(std::string_view filename) NOEXCEPT;
-  void Attach(GLenum type, std::string_view source) NOEXCEPT;
+  void Attach(GLenum type, int count, char const* const* sources) NOEXCEPT;
+
+  constexpr void Attach(GLenum type, std::string_view source) NOEXCEPT {
+    char const* inner = source.data();
+    Attach(type, 1, &inner);
+  }
+
+  constexpr void Attach(GLenum type, std::span<std::string_view> sources) NOEXCEPT {
+    std::unique_ptr<char const*> inner(new char const*[sources.size()]);
+    char const** pointer = inner.get(); // Pointer or index it's the same.
+    for (std::string_view& source : sources) *(pointer++) = source.data();
+    Attach(type, static_cast<int>(sources.size()), inner.get());
+  }
+
+  template <std::size_t Extent = std::dynamic_extent>
+  constexpr void Attach(GLenum type, std::span<char const*, Extent> sources) NOEXCEPT {
+    Attach(type, static_cast<int>(sources.size()), sources.data());
+  }
 
   void Link(void) NOEXCEPT;
 

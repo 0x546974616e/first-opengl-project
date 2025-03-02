@@ -3,6 +3,8 @@
 
 #include "imgui/imgui.h"
 #include "helper.hpp" // NOEXCEPT, TR, TR_MIN(), TR_MAX()
+#include <glm/vec3.hpp> // glm::vec3{}
+#include <glm/vec4.hpp> // glm::vec4{}
 
 enum ImGuiButtonFlagsGroup {
   ImGuiButtonFlagsGroup_None = 0,
@@ -10,6 +12,16 @@ enum ImGuiButtonFlagsGroup {
 };
 
 namespace ImGui {
+  ///
+  /// Compute multiple items widths.
+  ///
+  /// @return The horizontal item inner spacing.
+  ///
+  float GetMultiItemsWidths(int components, float itemsWidths[], float fullWidth) NOEXCEPT;
+  constexpr float GetMultiItemsWidths(int components, float itemsWidths[]) NOEXCEPT {
+    return GetMultiItemsWidths(components, itemsWidths, ImGui::CalcItemWidth());
+  }
+
   ///
   /// Draw a group of toggle buttons.
   ///
@@ -20,7 +32,7 @@ namespace ImGui {
   ///
   /// @post `*item` is between `0` and `count-1` or its given default value.
   ///
-  bool ToggleGroup(char const* label, int* item, char const* items[], int count) NOEXCEPT;
+  bool ToggleGroup(char const* label, int* item, char const* items[], int count, float fullWidth = 0.0f) NOEXCEPT;
 
   ///
   /// Draw a group of button to enable/disable flags.
@@ -42,35 +54,13 @@ namespace ImGui {
   /// Behave like `ImGui::ColorEdit3()` but the `ImGui::ColorButton()` takes all
   /// the available space (`ImGui::CalcItemWidth()`).
   ///
-  bool LargeColorEdit3(char const* label, ImVec4& color) NOEXCEPT;
+  bool LargeColorEdit3(char const* label, ImVec4& color, ImGuiColorEditFlags flags = ImGuiColorEditFlags_None, ImVec2 size = ImVec2(0, 0)) NOEXCEPT;
 
   ///
   /// Behave like `ImGui::ColorEdit4()` but the `ImGui::ColorButton()` takes all
   /// the available space (`ImGui::CalcItemWidth()`).
   ///
-  bool LargeColorEdit4(char const* label, ImVec4& color) NOEXCEPT;
-}
-
-namespace TR {
-  static constexpr ImVec2 operator*(ImVec2 const& vector, float scalar) NOEXCEPT {
-    return ImVec2(vector.x * scalar, vector.y * scalar);
-  }
-
-  static constexpr ImVec2 operator+(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(a.x + b.x, a.y + b.y);
-  }
-
-  static constexpr ImVec2 operator-(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(a.x - b.x, a.y - b.y);
-  }
-
-  static constexpr ImVec2 Min(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(TR_MIN(a.x, b.x), TR_MIN(a.y, b.y));
-  }
-
-  static constexpr ImVec2 Max(ImVec2 const& a, ImVec2 const& b) NOEXCEPT {
-    return ImVec2(TR_MAX(a.x, b.x), TR_MAX(a.y, b.y));
-  }
+  bool LargeColorEdit4(char const* label, ImVec4& color, ImGuiColorEditFlags flags = ImGuiColorEditFlags_None, ImVec2 size = ImVec2(0, 0)) NOEXCEPT;
 }
 
 #endif // TR_IMGUI_CUSTOM_HPP

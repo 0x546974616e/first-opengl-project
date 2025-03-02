@@ -38,10 +38,16 @@ CXX_DEPENDENCIES = $(CXX_OBJECTS:.o=.d)
 CCC = clang-19
 CXX = clang++-19
 
+TMP_UNUSED_FLAGS = \
+	-Wno-unused-parameter \
+	-Wno-unused-variable \
+	-Wno-unused-private-field \
+	-Wno-unused-function \
+	-Wno-unused-but-set-variable
+
 # TODO: See OpenSSF, -pedantic
 MACRO_EXPORT = ROOT_DIR RESOURCES_DIR
-COMMON_FLAGS = -Wall -Wextra -Wconversion -Werror -O0 \
-	-Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field \
+COMMON_FLAGS = -Wall -Wextra -Wconversion -Werror -O0 $(TMP_UNUSED_FLAGS) \
 	$(foreach macro,$(MACRO_EXPORT), -D TR_$(macro)='"$($(macro))"')
 
 CCC_FLAGS = $(COMMON_FLAGS) -std=c23

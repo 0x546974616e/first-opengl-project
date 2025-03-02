@@ -1,6 +1,8 @@
 #ifndef TR_EVENT_HPP
 #define TR_EVENT_HPP
 
+#include "helper.hpp" // TR_BEGIN_NAMESPACE()
+
 TR_BEGIN_NAMESPACE()
 
 struct Event {

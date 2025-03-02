@@ -9,6 +9,8 @@
 #include "Cube.hpp" // Cube{}
 #include "Grid.hpp" // Grid{}
 
+#include "light/LightShader.hpp"
+
 TR_BEGIN_NAMESPACE()
 
 class Engine final {

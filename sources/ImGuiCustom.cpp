@@ -8,7 +8,7 @@
 
 namespace TR {
   static void DrawNComponents(
-    char const* label, int count,
+    char const* label, int count, float fullWidth,
     std::function<void(ImVec2 size, int index)> draw
   ) NOEXCEPT {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -19,7 +19,7 @@ namespace TR {
     ImGui::PushID(label);
 
     ImGuiContext const* g = GImGui;
-    float fullWidth = ImGui::CalcItemWidth();
+    if (fullWidth == 0.0f) fullWidth = ImGui::CalcItemWidth();
     float itemInnerSpacingX = g->Style.ItemInnerSpacing.x;
     float itemWidth = fullWidth - itemInnerSpacingX * (static_cast<float>(count) - 1);
     float previousSplit = itemWidth;
@@ -48,7 +48,7 @@ namespace TR {
   }
 
   // NOTE: ImGui::ColorButton() could also be "hacked" to retrieve size from the (ImGui's) stack.
-  static bool LargeColorEdit(char const* label, ImVec4& color, ImGuiColorEditFlags flags) {
+  static bool LargeColorEdit(char const* label, ImVec4& color, ImGuiColorEditFlags flags, ImVec2 size = ImVec2(0, 0)) {
     ImGui::PushID(label);
 
     bool changed = false;
@@ -57,8 +57,8 @@ namespace TR {
     float itemInnerSpacingX = g->Style.ItemInnerSpacing.x;
 
     flags |= ImGuiColorEditFlags_AlphaPreviewHalf;
-    ImVec2 buttonSize = ImVec2(ImGui::CalcItemWidth(), 0);
-    if (ImGui::ColorButton(label, color, flags, buttonSize)) {
+    if (size.x == 0.0f) size.x = ImGui::CalcItemWidth();
+    if (ImGui::ColorButton(label, color, flags, size)) {
       ImGui::OpenPopup("##Popup");
       backupColor = color;
     }
@@ -104,13 +104,33 @@ namespace TR {
 }
 
 namespace ImGui {
+  // NOTE: Taken from imgui.cpp:ImGui::PushMultiItemsWidths().
+  float GetMultiItemsWidths(int components, float itemWidths[], float fullWidth) NOEXCEPT {
+    IM_ASSERT(components > 0);
+
+    ImGuiContext const* g = GImGui;
+    float itemInnerSpacingX = g->Style.ItemInnerSpacing.x;
+    float itemWidth = fullWidth - itemInnerSpacingX * (static_cast<float>(components) - 1);
+    float previousSplit = itemWidth;
+
+    for (int index = 0; index < components; ++index) {
+      float reverseIndex = static_cast<float>(components - index - 1);
+      float nextSplit = IM_TRUNC(itemWidth * reverseIndex / static_cast<float>(components));
+      itemWidths[index] = ImMax(previousSplit - nextSplit, 1.0f);
+      previousSplit = nextSplit;
+    }
+
+    return itemInnerSpacingX;
+  }
+
   bool ToggleGroup(
     char const* label, int* item,
-    char const* items[], int count
+    char const* items[], int count,
+    float fullWidth
   ) NOEXCEPT {
     bool itemChanged = false;
 
-    TR::DrawNComponents(label, count,
+    TR::DrawNComponents(label, count, fullWidth,
       [item, items, &itemChanged](ImVec2 size, int index) {
         bool active = *item == index;
         ImVec4 const* colors = ImGui::GetStyle().Colors;
@@ -131,7 +151,7 @@ namespace ImGui {
   ) NOEXCEPT {
     bool flagsChanged = false;
 
-    TR::DrawNComponents(label, count,
+    TR::DrawNComponents(label, count, 0.0f,
       [flags, flagsValues, flagsLabels, &flagsChanged, options](ImVec2 size, int index) {
         bool active = ((*flags) & flagsValues[index]) == flagsValues[index];
         ImVec4 const* colors = ImGui::GetStyle().Colors;
@@ -157,12 +177,12 @@ namespace ImGui {
     return flagsChanged;
   }
 
-  bool LargeColorEdit3(char const* label, ImVec4& color) NOEXCEPT {
+  bool LargeColorEdit3(char const* label, ImVec4& color, ImGuiColorEditFlags flags, ImVec2 size) NOEXCEPT {
     color.w = 1.0; // Reset alpha to prevent ImGui::ColorButton() displaying it.
-    return TR::LargeColorEdit(label, color, ImGuiColorEditFlags_NoAlpha);
+    return TR::LargeColorEdit(label, color, flags | ImGuiColorEditFlags_NoAlpha, size);
   }
 
-  bool LargeColorEdit4(char const* label, ImVec4& color) NOEXCEPT {
-    return TR::LargeColorEdit(label, color, ImGuiColorEditFlags_AlphaBar);
+  bool LargeColorEdit4(char const* label, ImVec4& color, ImGuiColorEditFlags flags, ImVec2 size) NOEXCEPT {
+    return TR::LargeColorEdit(label, color, flags | ImGuiColorEditFlags_AlphaBar, size);
   }
 }

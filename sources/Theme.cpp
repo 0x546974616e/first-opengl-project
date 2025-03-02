@@ -50,6 +50,7 @@ Theme::Theme(void) NOEXCEPT {
 
   // Widget
   m_colors[ColorActive]           = TR_COLOR_RGB(0x47, 0x72, 0xB3);
+  m_colors[ColorHighlight]        = TR_COLOR_RGB(0xB9, 0xD0, 0xF4);
   m_colors[ColorClickable]        = TR_COLOR_L(0x28);
   m_colors[ColorClickableActive]  = TR_COLOR_L(0x38);
   m_colors[ColorClickableHovered] = TR_COLOR_L(0x48);
@@ -113,6 +114,9 @@ void Theme::Apply(void) NOEXCEPT {
   colors[ImGuiCol_CheckMark]      = m_colors[ColorActive];
   colors[ImGuiCol_DragDropTarget] = m_colors[ColorActive];
   colors[ImGuiCol_NavCursor]      = m_colors[ColorActive];
+
+  colors[ImGuiCol_PlotLines]        = m_colors[ColorActive];
+  colors[ImGuiCol_PlotLinesHovered] = m_colors[ColorHighlight];
 
   // Tab
   colors[ImGuiCol_Tab]                       = m_colors[ColorClickable];
@@ -213,6 +217,7 @@ bool Theme::RenderEdit(void) NOEXCEPT {
 
   TR_SECTION("Widget",
     TR_EDIT3("Active", ColorActive);
+    TR_EDIT3("Highlight", ColorHighlight);
     TR_EDIT3("Clickable", ColorClickable);
     TR_EDIT3("Active Clickable", ColorClickableActive);
     TR_EDIT3("Hovered Clickable", ColorClickableHovered);

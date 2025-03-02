@@ -1,8 +1,8 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
-#include "ImGuiCustom.hpp" // operator+(ImVec2)
 
 #include <glad/glad.h> // OpenGL Loader
 #include <GLFW/glfw3.h> // GLFW Library
@@ -333,7 +333,7 @@ void Window::RenderUi(void) NOEXCEPT {
     // Viewport can never be NULL.
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::SetNextWindowSize(Min(viewport->Size * 0.8f, ImVec2(500, 800)), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImMin(viewport->Size * 0.8f, ImVec2(500, 800)), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
     ImGui::Begin("Style Editor", &m_styleOpen);
     ImGui::ShowStyleEditor();

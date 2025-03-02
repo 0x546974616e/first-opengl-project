@@ -26,11 +26,10 @@ static char const* ShaderType(GLenum type) NOEXCEPT {
   }
 }
 
-void Shader::Attach(GLenum type, std::string_view source) NOEXCEPT {
+void Shader::Attach(GLenum type, int count, char const* const* sources) NOEXCEPT {
   GLint status, length;
   GLuint shader = glCreateShader(type);
-  char const* data = source.data();
-  glShaderSource(shader, 1, &data, NULL);
+  glShaderSource(shader, count, sources, NULL);
   glCompileShader(shader);
 
   glGetShaderiv(shader, GL_COMPILE_STATUS, &status);

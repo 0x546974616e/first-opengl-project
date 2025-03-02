@@ -12,3 +12,6 @@
 - [ ] DPI?
 - [ ] Mouse/Keyboard input ImGui/Engine
 - [ ] Keyboard mapping?
+- [ ] Vsync?
+- [ ] GL Debug/Error
+- [ ] OpenGL Extensions?

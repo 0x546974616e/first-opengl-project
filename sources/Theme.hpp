@@ -41,6 +41,7 @@ public:
 
     // Widget
     ColorActive,
+    ColorHighlight,
     ColorClickable,
     ColorClickableActive,
     ColorClickableHovered,
